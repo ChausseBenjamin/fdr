@@ -8,11 +8,11 @@
 // This analogy is used to make sure that simultaneous notes are always grouped
 // under a single chord since they have information in common (start/end time).
 
-#define BUTTON1 0 // green
-#define BUTTON2 1 // red
-#define BUTTON3 2 // yellow
-#define BUTTON4 3 // blue
-#define BUTTON5 4 // orange
+#define FRET1 0 // green
+#define FRET2 1 // red
+#define FRET3 2 // yellow
+#define FRET4 3 // blue
+#define FRET5 4 // orange
 
 
 class Chord {
