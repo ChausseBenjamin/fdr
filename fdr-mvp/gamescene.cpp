@@ -108,9 +108,15 @@ void GameScene::keyPressEvent(QKeyEvent *event){
       recolor(fretStates);
       break;
     }
-    case Qt::Key_Return : { // Spawn a chord
+    case Qt::Key_Backslash : {
+      Chord* chord = new Chord(0,800,fretStates);
+      chord->spawn(this);
+      break;
+    }
+    case Qt::Key_Return : { // Spawn a short chord
       Chord* chord = new Chord(0,0,fretStates);
       chord->spawn(this);
+      break;
     }
   }
 }

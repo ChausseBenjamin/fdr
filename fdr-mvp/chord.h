@@ -9,11 +9,12 @@
 class Chord:public QObject {
   Q_OBJECT
   public:
-    Chord(int begin, int length, bool toPlay[5]) ;
+    Chord(int start, int duration, bool toPlay[5]) ;
     ~Chord();
     void spawn(GameScene* scene); // Draw the notes and launch them
   public slots:
     void move();  // Called every time the notes move
+    void despawn(); // Delete the chord once offscreen
   private:
     int start;       // Real time (in ms) at which the note should be hit
     int rushStart;   // Minimum allowed time to hit the note

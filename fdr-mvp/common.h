@@ -28,5 +28,7 @@ extern bool expectedFretStates[5];
 
 // Converts a unit of time (ms) to a unit of distance (px)
 int msToPx(int duration);
+// Converts a unit of distance (px) to a unit of time (ms)
+int pxToMs(int length);
 
 #endif // COMMON_H

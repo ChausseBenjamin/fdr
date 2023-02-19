@@ -1,3 +1,4 @@
+#include <QDebug>
 #include "common.h"
 
 // This is accessible to everyone but will mainly be altered by the remote
@@ -15,4 +16,14 @@ int msToPx(int duration){
   // GAME_SPEED is in px/s.
   // It must be divided by 1000 to be converted to px/ms
   return GAME_SPEED*duration/1000;
+}
+
+// Converts a unit of time (ms) to a unit of distance (px)
+// This works because everything moves at a constant speed
+// of GAME_SPEED. It is used to determine when to `delete`
+// a chord (as it would be offscreen and no longer needed).
+int pxToMs(int length){
+  int ms = 1000*length/GAME_SPEED;
+  qDebug() << "Time to suicide:" << QString::number(ms);
+  return  ms;
 }

@@ -9,3 +9,7 @@ Note::Note(int fret, int height): fret(fret) {
 int Note::getFret(){
   return fret;
 }
+
+void Note::recolor(bool pressed){
+  setBrush( pressed ? noteHitColor[fret] : noteIdleColor[fret] );
+}
