@@ -9,8 +9,7 @@ class Fret : public QGraphicsRectItem {
     Fret(int index); // Color and positionning is defined by the index
     void changeState(bool pressed);
   private:
-    QColor pressColor;
-    QColor releaseColor;
+    int index;
   };
 
 #endif // FRET_H

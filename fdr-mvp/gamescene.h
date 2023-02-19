@@ -9,9 +9,12 @@ class GameScene : public QGraphicsScene {
   Q_OBJECT
   public:
     explicit GameScene(QObject *parent = nullptr);
+    ~GameScene();
     void recolor(bool states[5]);
   private:
     Fret* frets[5];
+    double fretMarginX; // defined using ui.h macro
+    double fretMarginY; // defined using ui.h macro
   protected:
     // The keyboard is currently used to test
     // method behaviors

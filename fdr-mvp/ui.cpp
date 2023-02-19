@@ -1,3 +1,4 @@
+#include <QColor>
 #include "ui.h"
 
 // Color palette for frets
@@ -32,5 +33,10 @@ QColor noteHitColor[5] = { // 80% transparency
   QColor(240,  90,   0, 204)
 };
 
-// TODO: Remove this after testing
-bool fretStates[5] = {0};
+// Gradient for the game areas' background
+QColor bgGradient[2] = {
+  QColor(69, 0, 0), // Red
+  QColor(30, 0, 69) // Purple
+  // QColor(0, 0, 69), // Blue
+  // QColor(42, 42, 0) // Yellow
+};
