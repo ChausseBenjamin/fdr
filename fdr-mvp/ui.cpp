@@ -3,28 +3,29 @@
 
 // Color palette for frets
 QColor fretReleaseColor[5] = {
-  QColor(  0, 100,   0, 255),
-  QColor(139,   0,   0, 255),
-  QColor(128, 128,   0, 255),
-  QColor(  0,   0, 205, 255),
-  QColor(240,  90,   0, 240)
+  QColor(  0, 100,   0, 255), // Green
+  QColor(139,   0,   0, 255), // Red
+  QColor(128, 128,   0, 255), // Yellow
+  QColor(  0,   0, 205, 255), // Blue
+  QColor(240,  90,   0, 240)  // Orange
 };
 QColor fretPressColor[5] = {
-  QColor(144, 238, 144, 255),
-  QColor(255,  99,  71, 255),
-  QColor(255, 255, 153, 255),
-  QColor(135, 206, 235, 255),
-  QColor(255, 165,   0, 255)
+  QColor(144, 238, 144, 255), // Light Green
+  QColor(255,  99,  71, 255), // Light Red
+  QColor(255, 255, 153, 255), // Light Yellow
+  QColor(135, 206, 235, 255), // Light Blue
+  QColor(255, 200,  42, 255)  // Light Orange
 };
 
-// Color palette for frets (currently only changes in transparency)
+// Color palette for notes
+// Based on fretReleaseColor with altered transparency
 QColor noteIdleColor[5] = { // 60% transparency
   QColor(  0, 100,   0, 153),
   QColor(139,   0,   0, 153),
   QColor(128, 128,   0, 153),
   QColor(  0,   0, 205, 153),
   QColor(240,  90,   0, 153)
-};
+}; // TODO: Perhaps make noteHitColor slightly lighter
 QColor noteHitColor[5] = { // 80% transparency
   QColor(  0, 100,   0, 204),
   QColor(139,   0,   0, 204),
@@ -35,8 +36,6 @@ QColor noteHitColor[5] = { // 80% transparency
 
 // Gradient for the game areas' background
 QColor bgGradient[2] = {
-  QColor(69, 0, 0), // Red
-  QColor(30, 0, 69) // Purple
-  // QColor(0, 0, 69), // Blue
-  // QColor(42, 42, 0) // Yellow
+  QColor(69, 0, 0), // Dark Red
+  QColor(30, 0, 69) // Dark Purple
 };

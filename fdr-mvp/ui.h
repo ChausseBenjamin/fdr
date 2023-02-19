@@ -3,8 +3,12 @@
 
 #include <QColor>
 
+// Unlike `common.h`, this header only contains general information about
+// the VISUAL interface: resolution, colors, geometry, etc...
+
 // Game window dimensions
-// TODO: Make this modular in settings
+// TODO: Make this modular in a settings panel/tab/window
+// NOTE: If this gets modular, the GameScene class will need to update itself
 #define GAME_HEIGHT 1080
 #define GAME_WIDTH  480
 
@@ -12,14 +16,12 @@
 #define FRET_WIDTH    60
 #define FRET_HEIGHT   30
 #define FRET_MARGIN_X 30 // space between frets
-#define FRET_MARGIN_Y 30 // space between the bottom and the frets
+#define FRET_MARGIN_Y 30 // space between the screen's bottom and the frets
+
 // Onscreen dimensions of notes
 #define NOTE_WIDTH 50
-#define NOTE_SHORT_HEIGHT 20
-#define OFFSCREEN_NOTE_MARGIN 30 // distance offscreen to render notes
-
-// Maximum notes a fret can render at a time
-#define FRET_MAX_NOTE_RENDER 16
+#define NOTE_SHORT_HEIGHT 20 // Default height for single stroke notes
+#define OFFSCREEN_NOTE_MARGIN 30 // distance offscreen before deleting notes
 
 // Color palettes for different elements
 extern QColor fretReleaseColor[5];

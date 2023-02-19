@@ -26,10 +26,13 @@ GameScene::GameScene(QObject *parent)
   for (int i=0; i<5; i++){
     frets[i] = new Fret(i);
     addItem(frets[i]);
+    // NOTE: fret positions/coordinates are set once a QGraphicsView is mounted
   }
 }
 
 GameScene::~GameScene(){
+  // Notes are automatically killed once the suicide timer reaches it's end
+  // Only the frets need to be destructed
   for (int i=0; i<5; i++){
     delete frets[i];
   }
@@ -83,6 +86,7 @@ void GameScene::keyPressEvent(QKeyEvent *event){
       recolor(fretStates);
       break;
     }
+    // ASDFG are used to simulate the remote's frets while debugging
     case Qt::Key_A : {
       fretStates[0] = true;
       recolor(fretStates);
@@ -108,7 +112,7 @@ void GameScene::keyPressEvent(QKeyEvent *event){
       recolor(fretStates);
       break;
     }
-    case Qt::Key_Backslash : {
+    case Qt::Key_Backslash : { // Spawn a long chord (800ms)
       Chord* chord = new Chord(0,800,fretStates);
       chord->spawn(this);
       break;
@@ -120,7 +124,7 @@ void GameScene::keyPressEvent(QKeyEvent *event){
     }
   }
 }
-// Same as the above function but for key releases
+
 void GameScene::keyReleaseEvent(QKeyEvent *event){
   if (event->isAutoRepeat() == true) return;
   switch (event->key()) {

@@ -6,6 +6,9 @@
 #include "note.h"
 #include "gamescene.h"
 
+// A chord is a container for notes that have the same timing attributes
+// (i.e. when to spawn, when to hit, when to release)
+// A chord can contain a single note too.
 class Chord:public QObject {
   Q_OBJECT
   public:

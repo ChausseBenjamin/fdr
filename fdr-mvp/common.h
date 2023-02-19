@@ -3,11 +3,15 @@
 
 #include "ui.h"
 
+// This file contains definitions and variables that are used throughout
+// multiple classes. It's focus is mainly on the backend.
+
 // Information about motion:
 // This is the only place where time is measured in seconds
 // Otherwise, time is always measured in milliseconds
-#define GAME_SPEED 500 // pixels/second
-#define REFRESH_RATE 120 // frames/second
+// TODO: Perhaps make game speed configurable in a settings tab/screen/window
+#define GAME_SPEED 500 // how fast notes drop (px/s)
+#define REFRESH_RATE 60 // fps
 #define PX_PER_FRAME GAME_SPEED/REFRESH_RATE
 #define MS_PER_FRAME 1000/REFRESH_RATE
 
@@ -15,15 +19,17 @@
 #define TOLERANCE_RUSHING  -200 // ms (1/5th of a second)
 #define TOLERANCE_DRAGGING  200 // ms (1/5th of a second)
 
-// Scoring system
+// Scoring system // XXX: subject to change, only there as an example
 #define SCORE_GOOD_NOTE     75
 #define SCORE_WRONG_NOTE    25
 #define SCORE_NO_NOTE      -25 // no notes played by the player
 #define SCORE_SURPLUS_NOTE -50 // note played when none required
 
 // Last recorded state of all the frets
+// TODO: perhaps put this in a separate class only editable by the remote
 extern bool fretStates[5];
 // Frets that the player should be pressing right now
+// TODO: perhaps add this to a Song class where only it can change it's values
 extern bool expectedFretStates[5];
 
 // Converts a unit of time (ms) to a unit of distance (px)

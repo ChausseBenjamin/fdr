@@ -4,7 +4,11 @@
 #include "ui.h"
 
 Fret::Fret(int index): index(index) {
+  // Set the dimensions of the fret rectangle
+  // Coordinates are set to 0,0 as they are changed later
+  // when mounted to a QGraphicsView
   setRect(0,0,FRET_WIDTH,FRET_HEIGHT);
+  // Starting color is with button released
   setBrush(fretReleaseColor[index]);
 }
 
