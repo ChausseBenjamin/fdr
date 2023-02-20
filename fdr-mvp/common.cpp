@@ -24,6 +24,5 @@ int msToPx(int duration){
 // a chord (as it would be offscreen and no longer needed).
 int pxToMs(int length){
   int ms = 1000*length/GAME_SPEED;
-  qDebug() << "Time to suicide:" << QString::number(ms);
   return  ms;
 }

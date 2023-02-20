@@ -1,5 +1,7 @@
-#include "note.h"
 #include <QBrush>
+#include <QPointF>
+
+#include "note.h"
 
 Note::Note(int fret, int height): fret(fret) {
   // Set the color of the note (not hit)
@@ -7,6 +9,22 @@ Note::Note(int fret, int height): fret(fret) {
   // Set the dimensions of the note
   setRect(0,0,FRET_WIDTH,height);
   // Coordinates are calculated when the chord spawns it
+}
+
+Note::~Note(){
+}
+
+QPointF Note::pos() const {
+  return QGraphicsRectItem::pos();
+}
+
+void Note::setPos(const QPointF& pos){
+  QGraphicsItem::setPos(pos);
+  emit posChanged(pos);
+}
+
+void Note::setPos(const double x, const double y){
+  QGraphicsItem::setPos(x,y);
 }
 
 // Used to know the note is related to which fret
