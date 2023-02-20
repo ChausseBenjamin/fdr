@@ -89,11 +89,3 @@ void Chord::despawn(){
   qDebug() << "DELETING";
   delete this;
 }
-
-// Called everytime a frame passes by (moveTimer resets)
-// Moves every note by the distance required in one frame
-void Chord::move(){
-  for (int i=0; i<noteNB; i++){
-    notes[i]->moveBy(0,PX_PER_FRAME);
-  }
-}

@@ -17,7 +17,6 @@ class Chord:public QObject {
     ~Chord();
     void spawn(GameScene* scene); // Draw the notes and launch them
   public slots:
-    void move();  // Called every time the notes move
     void despawn(); // Delete the chord once offscreen
   private:
     int start;       // Real time (in ms) at which the note should be hit
