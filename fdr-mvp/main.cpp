@@ -2,6 +2,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QGraphicsRectItem>
+#include <QPainter>
 
 #include "gamescene.h"
 #include "ui.h"
@@ -15,6 +16,8 @@ int main(int argc, char *argv[]) {
   scene->setSceneRect(0,0,GAME_WIDTH,GAME_HEIGHT);
   // Create a view to put the scene inside
   QGraphicsView* view = new QGraphicsView();
+  // Enable antialiasing
+  view->setRenderHint(QPainter::Antialiasing);
   // Lock its dimensions
   view->setFixedSize(GAME_WIDTH,GAME_HEIGHT);
   // Mount the scene to the QGraphicsView
