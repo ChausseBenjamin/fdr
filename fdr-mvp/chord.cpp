@@ -1,6 +1,5 @@
 #include <QDebug>
 #include <QObject>
-#include <QTimer>
 #include <QParallelAnimationGroup>
 #include <QPropertyAnimation>
 #include "chord.h"
