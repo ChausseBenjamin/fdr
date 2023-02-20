@@ -3,6 +3,7 @@
 
 #include <QGraphicsRectItem>
 #include <QColor>
+#include <QObject>
 
 // A fret is the button at the bottom of the screen, it's position doesn't
 // change once initialized (as opposed to a note which can move).

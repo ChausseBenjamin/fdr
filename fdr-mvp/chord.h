@@ -2,6 +2,7 @@
 #define CHORD_H
 
 #include <QObject>
+#include <QTimeLine>
 
 #include "note.h"
 #include "gamescene.h"
@@ -29,6 +30,7 @@ class Chord:public QObject {
     int spawnTime;   // When in the song the note should spawn
     int  noteNB;     // number of notes in the notes array
     Note* notes[5];  // Simultaneous notes in one chord
+    // QTimeLine* timeline; // Used for the animation
 };
 
 #endif // CHORD_H
