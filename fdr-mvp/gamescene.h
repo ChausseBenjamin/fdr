@@ -15,6 +15,7 @@ class GameScene : public QGraphicsScene {
     explicit GameScene(QObject *parent = nullptr);
     ~GameScene();
     void recolor(bool states[5]); // Updates all fret colors (pressed/released)
+    Fret* getFret(int index);
   private:
     Fret* frets[5]; // At the bottom of the screen
     double fretMarginX; // defined using ui.h macro

@@ -42,28 +42,19 @@ Chord::~Chord(){
 // It calculates the coordinates for every note so that they line up with frets
 // I
 void Chord::spawn(GameScene* scene){
-  // Calculate positions: // TODO: find a more elegant solution
-  double totalW = scene->width();
-  double fretW  = FRET_WIDTH;
-  double marginW = FRET_MARGIN_X;
-  double noteW  = notes[0]->rect().width();
-  double noteH  = notes[0]->rect().height();
-  double totalH = scene->height()+OFFSCREEN_NOTE_MARGIN;
-  double xPos[5] = {
-    (totalW-4*fretW-4*marginW-noteW)/2,
-    (totalW-2*fretW-2*marginW-noteW)/2,
-    (totalW-noteW)/2,
-    (totalW+2*fretW+2*marginW-noteW)/2,
-    (totalW+4*fretW+4*marginW-noteW)/2
-  };
+  const double noteH  = notes[0]->rect().height();
+  const double totalH = scene->height()+OFFSCREEN_NOTE_MARGIN;
   // Time during which the note should move
-  int timeline = pxToMs(noteH+scene->height()+OFFSCREEN_NOTE_MARGIN);
+  const int timeline = pxToMs(noteH+totalH);
   QParallelAnimationGroup* groupAnimation = new QParallelAnimationGroup();
   for (int i=0; i<noteNB; i++){
-    notes[i]->setPos(xPos[ notes[i]->getFret() ],-noteH);
+    const Fret* fret = scene->getFret( notes[i]->getFret() );
+    const qreal fretX = fret->mapToScene(fret->rect().topLeft()).x();
+    const qreal x = fretX + (fret->rect().width()/2) - (notes[i]->rect().width()/2);
+    notes[i]->setPos(x,-noteH);
     QPropertyAnimation* animation = new QPropertyAnimation(notes[i],"pos");
     animation->setStartValue(notes[i]->pos());
-    animation->setEndValue(QPointF(notes[i]->pos().x(), totalH+OFFSCREEN_NOTE_MARGIN));
+    animation->setEndValue(QPointF(notes[i]->pos().x(), totalH));
     animation->setDuration(timeline);
     groupAnimation->addAnimation(animation);
     scene->addItem(notes[i]);
