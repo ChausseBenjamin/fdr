@@ -13,6 +13,7 @@ SOURCES += \
     common.cpp \
     fret.cpp \
     gamescene.cpp \
+    leftbar.cpp \
     note.cpp \
     ui.cpp \
     main.cpp
@@ -22,6 +23,7 @@ HEADERS += \
     common.h \
     fret.h \
     gamescene.h \
+    leftbar.h \
     note.h \
     ui.h
 

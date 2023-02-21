@@ -22,6 +22,8 @@ GameScene::GameScene(QObject *parent)
   gradient.setColorAt(1, bgGradient[1]);
   QBrush brush(gradient);
   setBackgroundBrush(brush);
+  // Add the leftbar to the scene
+  leftbar = new LeftBar(this);
   // Create the frets and add them to the scene
   for (int i=0; i<5; i++){
     frets[i] = new Fret(i);

@@ -4,6 +4,7 @@
 #include <QGraphicsScene>
 
 #include "fret.h"
+#include "leftbar.h"
 
 // This is the container for everything that happens in the game area.
 // Upon initialization, it places frets at the correct location.
@@ -17,6 +18,7 @@ class GameScene : public QGraphicsScene {
     void recolor(bool states[5]); // Updates all fret colors (pressed/released)
     Fret* getFret(int index);
   private:
+    LeftBar* leftbar;
     Fret* frets[5]; // At the bottom of the screen
     double fretMarginX; // defined using ui.h macro
     double fretMarginY; // defined using ui.h macro
