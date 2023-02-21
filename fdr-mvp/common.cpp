@@ -26,3 +26,9 @@ int pxToMs(int length){
   int ms = 1000*length/GAME_SPEED;
   return  ms;
 }
+
+int countTrue(bool arr[], int size) {
+  int ttl=0;
+  for (int i=0; i<size; i++) ttl+=arr[i];
+  return ttl;
+}

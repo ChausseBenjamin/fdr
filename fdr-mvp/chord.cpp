@@ -9,25 +9,21 @@
 #include "gamescene.h"
 
 Chord::Chord(int start, int duration, bool toPlay[5]):
-  start(start), duration(duration){
-  // Define timing tolerances for chords (relative to song start)
-  // TODO: Trigger events whenever those timings are reached in the song
-  rushStart = start+TOLERANCE_RUSHING;
-  dragStart = start+TOLERANCE_DRAGGING;
-  // When long chords are encountered, add those same tolerances are set
-  // TODO: Trigger events when ever those thresholds are reached
-  if (duration!=0){
-    rushRelease = rushStart+duration;
-    dragRelease = dragStart+duration;
-  }
-  // Count how many notes according to the total nb of true values in toPlay
-  noteNB = 0;
+  duration(duration),
+  start(start),
+  rushStart(start+TOLERANCE_RUSHING),
+  dragStart(start+TOLERANCE_DRAGGING),
+  rushRelease( (duration!=0)? rushStart+duration : 0 ),
+  dragRelease((duration!=0)? dragStart+duration : 0 ),
+  spawnTime(0), // TODO: calculate at what time a note should spawn
+  noteNB(countTrue(toPlay,5)) {
+  int ttl=0;
   for (int i=0; i<5; i++){
     if (toPlay[i]) {
       // At the same time, create those note rectangles with the right colors
       // Dimensions are defined by the duration of the note
       // msToPx handles durations of 0 and returns the length of a short note
-      notes[noteNB++] = new Note(i,msToPx(duration));
+      notes[ttl++] = new Note(i,msToPx(duration));
       // Note: the coordinates are set later using the spawn method
     }
   }

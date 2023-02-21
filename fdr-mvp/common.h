@@ -36,5 +36,7 @@ extern bool expectedFretStates[5];
 int msToPx(int duration);
 // Converts a unit of distance (px) to a unit of time (ms)
 int pxToMs(int length);
+// Count the number of true values in a bool array
+int countTrue(bool arr[], int size);
 
 #endif // COMMON_H
