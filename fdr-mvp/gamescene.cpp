@@ -15,13 +15,6 @@ GameScene::GameScene(QObject *parent)
   // Make sure ojects are correctly positionned once mounted to a QGraphicsView
   connect(this, &QGraphicsScene::sceneRectChanged,
           this, &GameScene::onMasterChanged);
-  // Create a cute little background gradient
-  // diagonal: from top-right to bottom-left
-  QLinearGradient gradient(GAME_WIDTH, 0, 0, GAME_HEIGHT);
-  gradient.setColorAt(0, bgGradient[0]);
-  gradient.setColorAt(1, bgGradient[1]);
-  QBrush brush(gradient);
-  setBackgroundBrush(brush);
   // Add the leftbar to the scene
   leftbar = new LeftBar(this);
   // Create the frets and add them to the scene
@@ -71,7 +64,14 @@ void GameScene::onMasterChanged(const QRectF& rect){
   };
   for (int i=0; i<5; i++){
       frets[i]->setPos(xPos[i],gameH-fretH-FRET_MARGIN_Y);
-    }
+  }
+  // Create a cute little background gradient
+  // diagonal: from top-right to bottom-left
+  QLinearGradient gradient(gameW, 0, 0, gameH);
+  gradient.setColorAt(0, bgGradient[0]);
+  gradient.setColorAt(1, bgGradient[1]);
+  QBrush brush(gradient);
+  setBackgroundBrush(brush);
 }
 
 // Handles what happens when keyboard keys are pressed.

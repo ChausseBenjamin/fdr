@@ -9,8 +9,8 @@
 // Game window dimensions
 // TODO: Make this modular in a settings panel/tab/window
 // NOTE: If this gets modular, the GameScene class will need to update itself
-#define GAME_HEIGHT 800
-#define GAME_WIDTH  1920
+// #define GAME_HEIGHT 800
+// #define GAME_WIDTH  1920
 
 // Onscreen dimensions of frets
 #define FRET_WIDTH    60

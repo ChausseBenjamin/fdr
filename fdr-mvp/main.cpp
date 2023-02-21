@@ -1,25 +1,29 @@
 #include <QApplication>
 #include <QGraphicsScene>
 #include <QGraphicsView>
-#include <QGraphicsRectItem>
+#include <QGuiApplication>
 #include <QPainter>
 
 #include "gamescene.h"
-#include "ui.h"
+#include "qscreen.h"
 
 int main(int argc, char *argv[]) {
   QApplication a(argc, argv);
 
+  // Get a list of the connected screens
+  QList<QScreen*> screens = QGuiApplication::screens();
+  // Create a view to put the scene inside
+  QGraphicsView* view = new QGraphicsView();
+  // Lock its dimensions (using the first screen from the list)
+  view->setFixedSize(screens.first()->availableSize());
+  // Make the game fullscreen
+  view->showFullScreen();
+  // Enable antialiasing
+  view->setRenderHint(QPainter::Antialiasing);
   // Create a game Scene
   GameScene* scene = new GameScene();
   // Set the resolution so that it's fixed and not dynamic
-  scene->setSceneRect(0,0,GAME_WIDTH,GAME_HEIGHT);
-  // Create a view to put the scene inside
-  QGraphicsView* view = new QGraphicsView();
-  // Enable antialiasing
-  view->setRenderHint(QPainter::Antialiasing);
-  // Lock its dimensions
-  view->setFixedSize(GAME_WIDTH,GAME_HEIGHT);
+  scene->setSceneRect(view->rect());
   // Mount the scene to the QGraphicsView
   view->setScene(scene);
   // Display the viewport
