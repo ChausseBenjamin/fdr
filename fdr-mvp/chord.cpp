@@ -38,27 +38,43 @@ Chord::~Chord(){
   }
 }
 
-// Spawn takes a chord and spawns it slightly above the user's screen
-// It calculates the coordinates for every note so that they line up with frets
-// I
+// Spawn takes a chord and spawns it slightly above the user's screen.
+// Since every note moves in the exact same way, their animations are run
+// in parallel. This improves performance and makes sure notes of a chord are
+// alway at the same height.
 void Chord::spawn(GameScene* scene){
+  // Get the height of the notes in the chord (it's the same for all)
   const double noteH  = notes[0]->rect().height();
-  const double totalH = scene->height()+OFFSCREEN_NOTE_MARGIN;
+  // Y distance to from the top of the screen to the end of the animation
+  const double yDist = scene->height()+OFFSCREEN_NOTE_MARGIN;
   // Time during which the note should move
-  const int timeline = pxToMs(noteH+totalH);
+  const int timeline = pxToMs(noteH+yDist);
+  // Group which contains the animations for all the individual notes
   QParallelAnimationGroup* groupAnimation = new QParallelAnimationGroup();
   for (int i=0; i<noteNB; i++){
+    // Fret object to the current note
     const Fret* fret = scene->getFret( notes[i]->getFret() );
+    // X position of that fret in the scene
     const qreal fretX = fret->mapToScene(fret->rect().topLeft()).x();
+    // x position of the current note
+    // This is necessary if the note doesn't have the same width as the fret
     const qreal x = fretX + (fret->rect().width()/2) - (notes[i]->rect().width()/2);
+    // Sets the note's position for the scene
     notes[i]->setPos(x,-noteH);
+    // Configure the animation for that note
     QPropertyAnimation* animation = new QPropertyAnimation(notes[i],"pos");
+    // Configure animation parameters (start position, end position, duration)
     animation->setStartValue(notes[i]->pos());
-    animation->setEndValue(QPointF(notes[i]->pos().x(), totalH));
+    animation->setEndValue(QPointF(notes[i]->pos().x(), yDist));
     animation->setDuration(timeline);
+    // Add the note's animation to the group
     groupAnimation->addAnimation(animation);
+    // Add the note to the scene so that it becomes visible
     scene->addItem(notes[i]);
   }
+  // Set the chord to self destruct once the animation finishes
+  // This happens offscreen. Also, the animation group deletes itself.
+  // This is here to prevent memory leaks
   connect(groupAnimation,
           &QParallelAnimationGroup::finished,
           new QObject(), // Object linked to groupAnimation to allow self-desctruct
@@ -66,6 +82,7 @@ void Chord::spawn(GameScene* scene){
             groupAnimation->deleteLater(); // free memory used by groupAnimation
             despawn(); // delete the Chord alongside all of it's notes
   });
+  // Start the animation
   groupAnimation->start();
 }
 
