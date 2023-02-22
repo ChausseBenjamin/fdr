@@ -3,12 +3,17 @@
 #include <QGraphicsView>
 #include <QGuiApplication>
 #include <QPainter>
+#include <QUrl>
 
 #include "gamescene.h"
 #include "qscreen.h"
+#include "song.h"
 
 int main(int argc, char *argv[]) {
   QApplication a(argc, argv);
+
+  // Test the Song class
+  Song song =Song(QUrl("qrc:/"));
 
   // Get a list of the connected screens
   QList<QScreen*> screens = QGuiApplication::screens();

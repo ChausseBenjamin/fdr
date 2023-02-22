@@ -15,6 +15,7 @@ SOURCES += \
     gamescene.cpp \
     leftbar.cpp \
     note.cpp \
+    song.cpp \
     ui.cpp \
     main.cpp
 
@@ -25,9 +26,13 @@ HEADERS += \
     gamescene.h \
     leftbar.h \
     note.h \
+    song.h \
     ui.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    resource.qrc

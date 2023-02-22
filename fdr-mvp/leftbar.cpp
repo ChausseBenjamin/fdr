@@ -13,6 +13,8 @@ LeftBar::LeftBar(QGraphicsScene* scene) {
   difficulty = new QGraphicsTextItem("No difficulty set");
   // Set the text size
   // TODO: Implement change text size
+  // Set the text fonts
+  // TODO: Implements fonts for different fonts
   // Set colors of the different elements
   title->setDefaultTextColor(TEXT_COLOR_MAIN);
   album->setDefaultTextColor(TEXT_COLOR_SECONDARY);
@@ -34,3 +36,4 @@ LeftBar::LeftBar(QGraphicsScene* scene) {
   // Add the elements to the scene
   for (int i=0; i<6; i++) scene->addItem(elements[i]);
 }
+
