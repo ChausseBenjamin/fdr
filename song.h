@@ -1,32 +1,46 @@
-#ifndef __SONG_H__
-#define __SONG_H__
+#ifndef SONG_H
+#define SONG_H
 
-#include "chord.h"
+#include <string>
 #include <vector>
 
-// Contains a song for a guitar hero clone
-class Song {
-  private:
-    std::string title;
-    std::string artist;
-    int duration;     // in ms
-    std::string audioFile; // path to audio file
-    std::vector<Chord> chords;
+#include "chord.h"
+#include "timestamp.h"
+
+#define DIFFICULTY_EASY   0
+#define DIFFICULTY_MEDIUM 1
+#define DIFFICULTY_HARD   2
+#define DIFFICULTY_EXPERT 3
+
+class Song{
   public:
     Song(std::string chartFile);
     ~Song();
-    void consolidate(); // merges chords with the same start/end times
-                        // into a single chord
-    Chord operator[](int index);
-    int size();
 
-    std::string getTitle();
-    std::string getArtist();
-    int getDuration();
-    std::string getAudioFile();
-    std::vector<Chord> getChords();
+    void parseInfo(); // info from "Song" section
+    void parseSync(); // timestamps from "SyncTrack" section
+    bool parseChords(int difficulty); // chords from "Events" section
+
+    void print();
+    void printTimestamps();
+
+  private:
+    const std::string chartFile;
+    std::string title;
+    std::string artist;
+    std::string charter;
+    std::string album;
+    std::string year;
+    std::string genre;
+    std::string audioFile;
+    bool difficulty[4]; // Which difficulties are available
+    int resolution;
+    std::vector<Timestamp> timestamps;
+    std::vector<Chord> easy;
+    std::vector<Chord> medium;
+    std::vector<Chord> hard;
+    std::vector<Chord> expert;
 };
 
 #include "song.cpp"
-#endif // __SONG_H__
-
+#endif // SONG_H
