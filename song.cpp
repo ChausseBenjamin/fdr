@@ -2,6 +2,8 @@
 #include <fstream>
 #include <regex>
 #include <string>
+#include <cstdint>
+#include <vector>
 
 #include "song.h"
 #include "timestamp.h"
@@ -81,7 +83,7 @@ void Song::parseSync(){
   // We want to prevent offsets in timings.
   // Timeline will store timings in nanoseconds and the different chords
   // will round down to the lower millisecond.
-  int currentTime = 0; // ns
+  unsigned int currentTime = 0; // ns
   // Open the chart file
   std::ifstream file(chartFile);
   if (!file.is_open()) {
@@ -106,8 +108,22 @@ void Song::parseSync(){
           // We can calculate the time passed since the last timestamp
           // and add it to the current time and create a new timestamp
           int tickDiff = tick - timestamps.back().getTick();
-          int timeDiff = nspt(nbpm, resolution) * tickDiff;
+          unsigned int timeDiff = nspt(nbpm, resolution) * tickDiff;
           currentTime += timeDiff;
+          if (currentTime < 0) {
+            std::cerr << "---------------------\n"
+                      << "NEGATIVE TIMESTAMP:\n"
+                      << "Last Timestamp:"
+                      << " tick=" << timestamps.back().getTick()
+                      << " bpm=" << timestamps.back().getBPM()
+                      << " time=" << timestamps.back().getTime() << "ns\n"
+                      << "Current Timestamp:"
+                      << " tick=" << tick
+                      << " bpm=" << nbpm
+                      << " time=" << currentTime << "ns\n"
+                      << "Other:"
+                      << " tickDiff=" << tickDiff << std::endl;
+          }
           timestamps.push_back(Timestamp(currentTime, tick, nbpm));
           std::cout << "BPM: " << timestamps.back().getNbpm() << " "
                     << "TickDiff: " << tickDiff << " "
@@ -118,10 +134,7 @@ void Song::parseSync(){
       if (line.find("[Events]") != std::string::npos) break;
     }
   }
-};
-
-bool Song::parseChords(int difficulty){
-  return false;
+  file.close();
 };
 
 void Song::printTimestamps(){
@@ -132,4 +145,95 @@ void Song::printTimestamps(){
               << std::endl;
   }
   if (timestamps.size() == 0) std::cout << "No timestamps found" << std::endl;
+}
+
+bool Song::parseChords(int difficulty){
+  // List of chords for each difficulty
+  const std::vector<Chord> *chordDifficulties[4]={&easy,&medium,&hard,&expert};
+  // List of patterns to stringPattern
+  const std::string patterns[4] = {
+    "EasySingle", "MediumSingle", "HardSingle", "ExpertSingle"
+  };
+  // We set the stringPattern to match depending on the difficulty
+  /* std::string stringPattern = patterns[difficulty]; */
+  std::string stringPattern = "ExpertSingle";
+  // We set a chord vector to store point to the correct difficulty vector
+  /* std::vector<Chord>*chords=(std::vector<Chord>*)chordDifficulties[difficulty]; */
+  std::vector<Chord>*chords = &expert;
+  // We open the chart file
+  std::ifstream file(chartFile);
+  if (!file.is_open()) {
+    std::cerr << "There was a problem opening the file";
+    return false;
+  }
+  std::string line;
+  while (getline(file,line)){
+    // We want to find the correct difficulty
+    if (line.find(stringPattern) != std::string::npos){
+      // We found the correct difficulty, let's parse the chords
+      while (getline(file,line)){
+        // Notes in chords have this format: ` tick = N fret duration`
+        // We want to match the tick, fret and duration using regex
+        std::regex pattern("([0-9]+) = N ([0-9]+) ([0-9]+)");
+        std::smatch match;
+        if (std::regex_search(line, match, pattern)){
+          // We found a match, let's parse the integers
+          int tick    = std::stoi(match[0]);
+          int fret    = std::stoi(match[1]);
+          int duration= std::stoi(match[2]);
+          // We need to find the timestamp with the closest tick that's smaller
+          int timestampIndex = 0;
+          for (int i=0; i<timestamps.size(); i++){
+            if (timestamps[i].getTick() < tick) timestampIndex = i;
+            else break;
+          }
+          // Get the tick of that timestamp
+          const int tsTick = timestamps[timestampIndex].getTick();
+          // Get the current bpm at that timestamp
+          const int tsBPM  = timestamps[timestampIndex].getNbpm();
+          // Get the time of that timestamp
+          const unsigned int tsTime = timestamps[timestampIndex].getTime();
+          // Calculate the start time of the chord
+          const unsigned int chordTime = tsTime+(nspt(tsBPM, resolution) * (tick - tsTick));
+          int chordEnd = 0;
+          if (duration != 0){
+            // Calculate the duration of the chord
+            const unsigned int chordDuration = nspt(tsBPM, resolution) * duration;
+            chordEnd = chordTime + chordDuration;
+          }
+          if (chordTime < 0) {
+            std::cerr << "----------------------------\n"
+                      << "Chord start time is negative\n"
+                      << "LTI:"
+                      << " i=" << timestampIndex
+                      << " tick=" << tsTick
+                      << " time=" << tsTime
+                      << " bpm=" << tsBPM << "\n"
+                      << "Chord Info:"
+                      << " res=" << resolution
+                      << " tick=" << tick
+                      << " time=" << chordTime
+                      << " delta=" << (tick - tsTick) << "\n"
+                      << "Other: nspt=" << nspt(tsBPM,resolution) << std::endl;
+          }
+          // Create a new chord and add it to the vector
+          chords->push_back(Chord(fret, chordTime, chordEnd));
+        }
+        else if (line.find("[") != std::string::npos) return true;
+      }
+    }
+  }
+  return false;
+};
+
+
+void Song::consolidate(){
+  // TODO: Merge chords that have the same start/end time
+}
+
+void Song::printChords(int difficulty){
+  for (int i=0; i<expert.size(); i++){
+    expert[i].print();
+  }
+  if (expert.size() == 0) std::cout << "No chords found" << std::endl;
 }

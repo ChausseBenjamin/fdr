@@ -1,6 +1,6 @@
 #include "timestamp.h"
 
-Timestamp::Timestamp(int time, int tick, int nbpm):
+Timestamp::Timestamp(unsigned int time, int tick, int nbpm):
   time(time), tick(tick), nbpm(nbpm){};
 
 int Timestamp::getTime(){
