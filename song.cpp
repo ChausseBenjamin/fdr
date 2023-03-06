@@ -2,7 +2,6 @@
 #include <fstream>
 #include <regex>
 #include <string>
-#include <cstdint>
 #include <vector>
 
 #include "song.h"
@@ -83,32 +82,35 @@ void Song::parseSync(){
   // We want to prevent offsets in timings.
   // Timeline will store timings in nanoseconds and the different chords
   // will round down to the lower millisecond.
-  unsigned int currentTime = 0; // ns
+  long int currentTime = 0; // ns
   // Open the chart file
   std::ifstream file(chartFile);
   if (!file.is_open()) {
     std::cerr << "There was a problem opening the file";
     return;
   }
+  int lineNb = 0;
   std::string line;
   while (getline(file,line)){
+    lineNb++;
     // We are only interested in the SyncTrack
     if (line.find("[SyncTrack]") != std::string::npos)
     while (getline(file,line)) {
+      lineNb++;
       std::regex pattern("([0-9]+) = B ([0-9]+)");
       std::smatch match;
       if (std::regex_search(line, match, pattern)){
         // We found a match, let's parse the integers
         int tick  = std::stoi(match[1]);
         int nbpm  = std::stoi(match[2]);
-        if (timestamps.size() == 0){
+        if (tick == 0){
           // First timestamp, we need to add a default one
           timestamps.push_back(Timestamp(0, tick, nbpm));
         } else {
           // We can calculate the time passed since the last timestamp
           // and add it to the current time and create a new timestamp
           int tickDiff = tick - timestamps.back().getTick();
-          unsigned int timeDiff = nspt(nbpm, resolution) * tickDiff;
+          long int timeDiff = nspt(nbpm, resolution) * tickDiff;
           currentTime += timeDiff;
           if (currentTime < 0) {
             std::cerr << "---------------------\n"
@@ -126,6 +128,8 @@ void Song::parseSync(){
           }
           timestamps.push_back(Timestamp(currentTime, tick, nbpm));
           std::cout << "BPM: " << timestamps.back().getNbpm() << " "
+                    << "Tick: " << timestamps.back().getTick() << " "
+                    << "Line: " << lineNb << " "
                     << "TickDiff: " << tickDiff << " "
                     << "TimeDiff: " << timeDiff << "ns "
                     << "Current time: " << currentTime << std::endl;
@@ -192,13 +196,13 @@ bool Song::parseChords(int difficulty){
           // Get the current bpm at that timestamp
           const int tsBPM  = timestamps[timestampIndex].getNbpm();
           // Get the time of that timestamp
-          const unsigned int tsTime = timestamps[timestampIndex].getTime();
+          const long int tsTime = timestamps[timestampIndex].getTime();
           // Calculate the start time of the chord
-          const unsigned int chordTime = tsTime+(nspt(tsBPM, resolution) * (tick - tsTick));
+          const long int chordTime = tsTime+(nspt(tsBPM, resolution) * (tick - tsTick));
           int chordEnd = 0;
           if (duration != 0){
             // Calculate the duration of the chord
-            const unsigned int chordDuration = nspt(tsBPM, resolution) * duration;
+            const long int chordDuration = nspt(tsBPM, resolution) * duration;
             chordEnd = chordTime + chordDuration;
           }
           if (chordTime < 0) {
