@@ -1,5 +1,7 @@
 #include <iostream>
 
+#define DEBUG
+
 #include "song.h"
 
 int main() {
@@ -7,6 +9,6 @@ int main() {
   song.parseSync();
   song.parseChords(0);
   /* song.print(); */
-  /* song.printChords(0); */
+  song.printChords(0);
   return 0;
 };

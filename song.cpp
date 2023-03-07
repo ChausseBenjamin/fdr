@@ -112,6 +112,7 @@ void Song::parseSync(){
           int tickDiff = tick - timestamps.back().getTick();
           long int timeDiff = nspt(nbpm, resolution) * tickDiff;
           currentTime += timeDiff;
+          #ifdef DEBUG
           if (currentTime < 0) {
             std::cerr << "---------------------\n"
                       << "NEGATIVE TIMESTAMP:\n"
@@ -126,13 +127,16 @@ void Song::parseSync(){
                       << "Other:"
                       << " tickDiff=" << tickDiff << std::endl;
           }
+          #endif // DEBUG
           timestamps.push_back(Timestamp(currentTime, tick, nbpm));
-          std::cout << "BPM: " << timestamps.back().getNbpm() << " "
-                    << "Tick: " << timestamps.back().getTick() << " "
-                    << "Line: " << lineNb << " "
-                    << "TickDiff: " << tickDiff << " "
-                    << "TimeDiff: " << timeDiff << "ns "
-                    << "Current time: " << currentTime << std::endl;
+          #ifdef DEBUG
+            std::cout << "BPM: " << timestamps.back().getNbpm() << " "
+                      << "Tick: " << timestamps.back().getTick() << " "
+                      << "Line: " << lineNb << " "
+                      << "TickDiff: " << tickDiff << " "
+                      << "TimeDiff: " << timeDiff << "ns "
+                      << "Current time: " << currentTime << std::endl;
+          #endif // DEBUG
         }
       }
       if (line.find("[Events]") != std::string::npos) break;
@@ -182,9 +186,9 @@ bool Song::parseChords(int difficulty){
         std::smatch match;
         if (std::regex_search(line, match, pattern)){
           // We found a match, let's parse the integers
-          int tick    = std::stoi(match[0]);
-          int fret    = std::stoi(match[1]);
-          int duration= std::stoi(match[2]);
+          int tick    = std::stoi(match[1]);
+          int fret    = std::stoi(match[2]);
+          int duration= std::stoi(match[3]);
           // We need to find the timestamp with the closest tick that's smaller
           int timestampIndex = 0;
           for (int i=0; i<timestamps.size(); i++){
@@ -205,6 +209,7 @@ bool Song::parseChords(int difficulty){
             const long int chordDuration = nspt(tsBPM, resolution) * duration;
             chordEnd = chordTime + chordDuration;
           }
+          #ifdef DEBUG
           if (chordTime < 0) {
             std::cerr << "----------------------------\n"
                       << "Chord start time is negative\n"
@@ -220,6 +225,10 @@ bool Song::parseChords(int difficulty){
                       << " delta=" << (tick - tsTick) << "\n"
                       << "Other: nspt=" << nspt(tsBPM,resolution) << std::endl;
           }
+          std::cout << line << std::endl;
+          std::cout << "Note ajoutée: " << fret
+                    << " Tick: " << tick << std::endl;
+          #endif // DEBUG
           // Create a new chord and add it to the vector
           chords->push_back(Chord(fret, chordTime, chordEnd));
         }
