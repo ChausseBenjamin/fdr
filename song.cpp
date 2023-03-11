@@ -182,7 +182,7 @@ bool Song::parseChords(int difficulty){
       while (getline(file,line)){
         // Notes in chords have this format: ` tick = N fret duration`
         // We want to match the tick, fret and duration using regex
-        std::regex pattern("([0-9]+) = N ([0-9]+) ([0-9]+)");
+        std::regex pattern("([0-9]+) = N ([0-4]+) ([0-9]+)");
         std::smatch match;
         if (std::regex_search(line, match, pattern)){
           // We found a match, let's parse the integers
@@ -240,8 +240,45 @@ bool Song::parseChords(int difficulty){
 };
 
 
-void Song::consolidate(){
-  // TODO: Merge chords that have the same start/end time
+void Song::consolidateChords(int difficulty){
+  // TODO: make this fuction use the difficulty parameter
+  std::vector<Chord>*chords = &expert;
+  // Number of chords in the vector
+  int chordSize = chords->size();
+  // Go through all the chords
+  for (int i=0; i<chordSize; i++){
+    Chord currentChord = chords->at(i);
+    // Check if any other chord past the current one
+    // has the same start and end time
+    for (int j=i+1; j<chordSize; j++){
+      Chord nextChord = chords->at(j);
+      if (currentChord.getStart() == nextChord.getStart() &&
+          currentChord.getEnd() == nextChord.getEnd()){
+        // If so:
+        // - add the fret to the current chord
+        // - remove the next one
+        // - decrement the chordSize
+        // - decrement the j counter
+        #ifdef DEBUG
+        std::cout << "----------------------------\n"
+                  << "Chords merged: ";
+        currentChord.print();
+        std::cout << " + ";
+        nextChord.print();
+        std::cout << " =";
+        #endif // DEBUG
+        currentChord.merge(nextChord);
+        #ifdef DEBUG
+        currentChord.print();
+        #endif
+        chords->erase(chords->begin()+j);
+        chordSize--;
+        j--;
+      }
+    }
+    // Shrink the vector to the new size
+    chords->shrink_to_fit();
+  }
 }
 
 void Song::printChords(int difficulty){

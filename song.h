@@ -25,7 +25,7 @@ class Song{
     void printTimestamps();
     void printChords(int difficulty);
 
-    void consolidate(); // Merge chords with same start/end times
+    void consolidateChords(int difficulty); // Merge chords with same start/end times
 
   private:
     const std::string chartFile;

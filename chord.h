@@ -7,11 +7,18 @@ class Chord {
     Chord(bool noteStates[5], int start, int end=0);
     // When used along with a chartfile:
     Chord(int note, int start, int end=0);
+    // Copy constructor:
+    Chord(const Chord& chord);
+    // Assignment operator:
+    Chord& operator=(const Chord& other);
     // Modifiers:
     bool toggle(int note); // To add/remove a note to a chord
     // Getters:
     bool has(int note); // To check if a note is in the chord
     bool* getNotes(); // To get all notes in the chord
+    int getStart(); // To get the start time of the chord
+    int getEnd(); // To get the end time of the chord
+    void merge(Chord chord); // To merge two chords
     void print(); // For debugging
   private:
     bool noteStates[5];
