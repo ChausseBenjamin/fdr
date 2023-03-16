@@ -49,6 +49,6 @@ std::string Song::getAudioFile() {
   return audioFile;
 }
 
-std::vector<Chord> Song::getChords() {
+std::vector<ChordNote> Song::getChords() {
   return chords;
 }

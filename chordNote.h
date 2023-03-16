@@ -1,5 +1,5 @@
-#ifndef __CHORD_H__
-#define __CHORD_H__
+#ifndef __CHORDNOTE_H__
+#define __CHORDNOTE_H__
 
 #include <regex>
 
@@ -15,7 +15,7 @@
 #define FRET5 4 // orange
 
 
-class Chord {
+class ChordNote {
   private:
     bool notes[5];    // which buttons are pressed
     int  start;       // when to play in ms (relative to song start)
@@ -27,8 +27,8 @@ class Chord {
     // in .chart files.
     // End time is initialized to 0 but can be changed if the .chart indicates
     // that the chord is held for longer than the default 1/16th note.
-    Chord(int btn, int startTime, int endTime);
-    ~Chord();
+    ChordNote(int btn, int startTime, int endTime);
+    ~ChordNote();
     void  change(int button);             // change note in existing chord
     void  setEnd(int endTime);            // set the end time of the chord
     void  setRenderStart(int renderTime); // sets when to start rendering
@@ -41,5 +41,5 @@ class Chord {
                                           // the expected chord
 };
 
-#include "chord.cpp"
-#endif // __CHORD_H__
+#include "chordNote.cpp"
+#endif // __CHORDNOTE_H__

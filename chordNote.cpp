@@ -1,6 +1,6 @@
-#include "chord.h"
+#include "chordNote.h"
 
-Chord::Chord(int btn, int startTime, int endTime) {
+ChordNote::ChordNote(int btn, int startTime, int endTime) {
   start = startTime;
   end = endTime;
   for (int i=0; i<5; i++) {
@@ -9,37 +9,37 @@ Chord::Chord(int btn, int startTime, int endTime) {
   notes[btn] = true;
 };
 
-Chord::~Chord() {};
+ChordNote::~ChordNote() {};
 
-void Chord::change(int button) {
+void ChordNote::change(int button) {
   notes[button] = !notes[button];
 };
 
-void Chord::setEnd(int endTime) {
+void ChordNote::setEnd(int endTime) {
   end = endTime;
 };
 
-void Chord::setRenderStart(int renderTime) {
+void ChordNote::setRenderStart(int renderTime) {
   renderStart = start - renderTime;
 };
 
-bool* Chord::getNotes() {
+bool* ChordNote::getNotes() {
   return notes;
 };
 
-int Chord::getStart() {
+int ChordNote::getStart() {
   return start;
 };
 
-int Chord::getEnd() {
+int ChordNote::getEnd() {
   return end;
 };
 
-int Chord::getRenderStart() {
+int ChordNote::getRenderStart() {
   return renderStart;
 };
 
-std::regex Chord::getRegex() {
+std::regex ChordNote::getRegex() {
   // empty string
   std::string regex = "";
   // true becomes "t" and false becomes "f"
