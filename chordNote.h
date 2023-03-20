@@ -1,16 +1,16 @@
 #ifndef CHORD_H
 #define CHORD_H
 
-class Chord {
+class ChordNote {
   public:
     // When all notes are known:
-    Chord(bool noteStates[5], int start, int end=0);
+    ChordNote(bool noteStates[5], int start, int end=0);
     // When used along with a chartfile:
-    Chord(int note, int start, int end=0);
+    ChordNote(int note, int start, int end=0);
     // Copy constructor:
-    Chord(const Chord& chord);
+    ChordNote(const ChordNote& chord);
     // Assignment operator:
-    Chord& operator=(const Chord& other);
+    ChordNote& operator=(const ChordNote& other);
     // Modifiers:
     bool toggle(int note); // To add/remove a note to a chord
     // Getters:
@@ -18,7 +18,7 @@ class Chord {
     bool* getNotes(); // To get all notes in the chord
     int getStart(); // To get the start time of the chord
     int getEnd(); // To get the end time of the chord
-    void merge(Chord chord); // To merge two chords
+    void merge(ChordNote chord); // To merge two chords
     void print(); // For debugging
   private:
     bool noteStates[5];
@@ -27,5 +27,5 @@ class Chord {
     // TODO: add a Note class and a `Note* notes[5]` member
 };
 
-#include "chord.cpp"
+#include "chordNote.cpp"
 #endif // CHORD_H

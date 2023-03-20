@@ -157,7 +157,7 @@ void Song::printTimestamps(){
 
 bool Song::parseChords(int difficulty){
   // List of chords for each difficulty
-  const std::vector<Chord> *chordDifficulties[4]={&easy,&medium,&hard,&expert};
+  const std::vector<ChordNote> *chordDifficulties[4]={&easy,&medium,&hard,&expert};
   // List of patterns to stringPattern
   const std::string patterns[4] = {
     "EasySingle", "MediumSingle", "HardSingle", "ExpertSingle"
@@ -166,8 +166,8 @@ bool Song::parseChords(int difficulty){
   /* std::string stringPattern = patterns[difficulty]; */
   std::string stringPattern = "ExpertSingle";
   // We set a chord vector to store point to the correct difficulty vector
-  /* std::vector<Chord>*chords=(std::vector<Chord>*)chordDifficulties[difficulty]; */
-  std::vector<Chord>*chords = &expert;
+  /* std::vector<ChordNote>*chords=(std::vector<ChordNote>*)chordDifficulties[difficulty]; */
+  std::vector<ChordNote>*chords = &expert;
   // We open the chart file
   std::ifstream file(chartFile);
   if (!file.is_open()) {
@@ -230,7 +230,7 @@ bool Song::parseChords(int difficulty){
                     << " Tick: " << tick << std::endl;
           #endif // DEBUG
           // Create a new chord and add it to the vector
-          chords->push_back(Chord(fret, chordTime, chordEnd));
+          chords->push_back(ChordNote(fret, chordTime, chordEnd));
         }
         else if (line.find("[") != std::string::npos) return true;
       }
@@ -242,16 +242,16 @@ bool Song::parseChords(int difficulty){
 
 void Song::consolidateChords(int difficulty){
   // TODO: make this fuction use the difficulty parameter
-  std::vector<Chord>*chords = &expert;
+  std::vector<ChordNote>*chords = &expert;
   // Number of chords in the vector
   int chordSize = chords->size();
   // Go through all the chords
   for (int i=0; i<chordSize; i++){
-    Chord currentChord = chords->at(i);
+    ChordNote currentChord = chords->at(i);
     // Check if any other chord past the current one
     // has the same start and end time
     for (int j=i+1; j<chordSize; j++){
-      Chord nextChord = chords->at(j);
+      ChordNote nextChord = chords->at(j);
       if (currentChord.getStart() == nextChord.getStart() &&
           currentChord.getEnd() == nextChord.getEnd()){
         // If so:

@@ -4,7 +4,7 @@ FLAGS = -march=native -Ofast -flto -D_GBLIBCXX_PARALLEL -fopenmp
 CC = g++
 
 # Executable files to ./fdr
-fdr: song.h song.cpp chord.h chord.cpp timestamp.h timestamp.cpp common.h common.cpp main.cpp
+fdr: song.h song.cpp chordNote.h chordNote.cpp timestamp.h timestamp.cpp common.h common.cpp main.cpp
 	$(CC) $(FLAGS) main.cpp -o fdr
 	chmod +x fdr
 

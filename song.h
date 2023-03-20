@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "chord.h"
+#include "chordNote.h"
 #include "timestamp.h"
 
 #define DIFFICULTY_EASY   0
@@ -48,10 +48,10 @@ class Song{
     bool difficulty[4]; // Which difficulties are available
     int resolution;
     std::vector<Timestamp> timestamps;
-    std::vector<Chord> easy;
-    std::vector<Chord> medium;
-    std::vector<Chord> hard;
-    std::vector<Chord> expert;
+    std::vector<ChordNote> easy;
+    std::vector<ChordNote> medium;
+    std::vector<ChordNote> hard;
+    std::vector<ChordNote> expert;
 };
 
 #include "song.cpp"
