@@ -27,6 +27,7 @@ using namespace std;
 #define STRUM_UP 5
 #define STRUM_DN 6
 #define JOY_DIR 7
+#define ACCEL 8
 
 
 
@@ -34,9 +35,9 @@ using namespace std;
 bool SendToSerial(SerialPort *arduino, json j_msg);
 bool RcvFromSerial(SerialPort *arduino, string &msg);
 void RcvJsonThread();
-void testThread();
 bool ComparePlayedNotes(ChordNote note, bool strumNeeded);
 bool CompareIndividualButton(bool wantedValue, int buttonState);
+int GetLedState();
 
 /*---------------------------- Variables globales ---------------------------*/
 SerialPort * arduino; //doit etre un objet global!
@@ -49,24 +50,25 @@ int Fret5 = 0;
 int JoyDir = 0;
 int StrumUp = 0;
 int StrumDown = 0;
+int IsShaking = 0;
+int NotesCorrectStreak = 0;
 
-int testInt = 0;
 bool isThreadOver = false;
 
 int main()
 {
-    string raw_msg;
+    string displayString;
 
     // Initialisation du port de communication
     //string com;
     //cout <<"Entrer le port de communication du Arduino: ";
     //cin >> com;
 
-    const int NB_SQUARES = 20;
-    ChordNote note1(0, 5000, 5400);
-    ChordNote note2(1, 5800, 5800);
-    ChordNote note3(2, 6600, 6600);
-    ChordNote note4(3, 8000, 8000);
+    const int NB_SQUARES = 50;
+    ChordNote note1(0, 5200, 5600);
+    ChordNote note2(1, 6000, 0);
+    ChordNote note3(2, 6600, 0);
+    ChordNote note4(3, 8000, 0);
     ChordNote note5(0, 9000, 9600);
     /*ChordNote note6(4, 7200, 7200);
     ChordNote note7(1, 7400, 7400);
@@ -77,7 +79,7 @@ int main()
     note2.change(0);
 
     const int FRAMERATE = 100;
-    int renderStart = FRAMERATE * NB_SQUARES;
+    int renderStart = FRAMERATE * (NB_SQUARES);
     note1.setRenderStart(renderStart);
     note2.setRenderStart(renderStart);
     note3.setRenderStart(renderStart);
@@ -120,13 +122,16 @@ int main()
     int nextRenderNoteIndex = 0;
     int nextNoteToPlay = 0;
     int nbNotesCorrect = 0;
+    int points = 0;
+    bool hasLetGoHold = false;
+    int lastCorrectHoldTime = 0;
 
     std::thread worker(RcvJsonThread);
 
     while (SongNotDone)
     {
         auto currentTime = chrono::steady_clock::now();
-        totalDiff = double(std::chrono::duration_cast <std::chrono::milliseconds>(currentTime - startTime).count());
+        totalDiff = int(std::chrono::duration_cast <std::chrono::milliseconds>(currentTime - startTime).count());
 
         if(totalDiff > 10000)//End of song
         {
@@ -137,41 +142,94 @@ int main()
         else
         {
             auto newCheckTime = chrono::steady_clock::now();
-            double diffLastPrint = 0;
 
-            diffLastPrint = double(std::chrono::duration_cast <std::chrono::milliseconds>(newCheckTime - lastPrintTime).count());
+            int diffSinceBeginning = int(std::chrono::duration_cast <std::chrono::milliseconds>(newCheckTime - startTime).count());
 
-            double diffSinceBeginning = double(std::chrono::duration_cast <std::chrono::milliseconds>(newCheckTime - startTime).count());
-
-            //TO ADD : CHECK NOTES INPUT
+            //CHECK NOTES INPUT
             int nextNoteStart = song[nextNoteToPlay].getStart();
+            /*if (abs(nextNoteStart - diffSinceBeginning) < 25)
+            {
+                isNotePlayedCorrectly = ComparePlayedNotes(song[nextNoteToPlay], false);
+                nextNoteToPlay++;
+                if (isNotePlayedCorrectly)
+                {
+                    nbNotesCorrect++;
+                }
+            }*/
+            if (abs(nextNoteStart - diffSinceBeginning) < 25 && nextNoteToPlay < NB_NOTES)
+            {
+                bool isNotePlayedCorrectly = ComparePlayedNotes(song[nextNoteToPlay], false); //TODO. DEVRA ETRE A TRUE
+                if (isNotePlayedCorrectly)
+                {
+                    //cout << " REUSSI A " << diffSinceBeginning << endl;
+                    nbNotesCorrect++;
+                    bool* notes = song[nextNoteToPlay].getNotes();
+                    for (int i = 0; i < 5; i++)
+                    {
+                        if (notes[i])
+                        {
+                            points += 100;
+                        }
+                    }
+                    nextNoteToPlay++;
+                    NotesCorrectStreak++;
+                    lastCorrectHoldTime = diffSinceBeginning;
+                    hasLetGoHold = false;
+                }
+            }
+            else if (nextNoteStart < diffSinceBeginning && nextNoteToPlay < NB_NOTES)
+            {
+                nextNoteToPlay++;
+                NotesCorrectStreak = 0;
+                //Enlever des points ????
+            }
+
+            //Gestion des longues notes
             int previousNoteEnd = 0;
-            bool isNotePlayedCorrectly = false;
             if (nextNoteToPlay > 0)
             {
                 previousNoteEnd = song[nextNoteToPlay - 1].getEnd();
             }
-            if (abs(nextNoteStart - diffSinceBeginning) < 25)
+            if (previousNoteEnd > 0 && previousNoteEnd > diffSinceBeginning)
             {
-               isNotePlayedCorrectly = ComparePlayedNotes(song[nextNoteToPlay], false);
-               nextNoteToPlay++;
-               if (isNotePlayedCorrectly)
-               {
-                   nbNotesCorrect++;
-               }
+                if (!hasLetGoHold)
+                {
+                    bool isHeldNotePlayedCorrectly = ComparePlayedNotes(song[nextNoteToPlay - 1], false);
+                    if (isHeldNotePlayedCorrectly)
+                    {
+                        if (lastCorrectHoldTime >= song[nextNoteToPlay - 1].getStart())
+                        {
+                            points += diffSinceBeginning - lastCorrectHoldTime;
+                        }
+                        lastCorrectHoldTime = diffSinceBeginning;
+                    }
+                    else
+                    {
+                        hasLetGoHold = true;
+                    }
+                }
             }
-            //if (diffLastPrint <= previousNoteEnd)
-            
+
 
             //Gestion affichage            
-            if(diffLastPrint >= FRAMERATE)
+            if(diffSinceBeginning % FRAMERATE == 0)
             {
-                system("cls");
+                //system("cls");
+                displayString.clear();
                 lastPrintTime = newCheckTime;
                 if (nextRenderNoteIndex > 0)
                 {
                     int previousNoteRenderStart = song[nextRenderNoteIndex -1].getRenderStart();
-                    int previousNoteLength = song[nextRenderNoteIndex -1].getEnd() - song[nextRenderNoteIndex -1].getStart();
+                    int previousNoteEnd = song[nextRenderNoteIndex - 1].getEnd();
+                    int previousNoteLength;
+                    if (previousNoteEnd == 0)
+                    {
+                        previousNoteLength = 0;
+                    }
+                    else
+                    {
+                        previousNoteLength = previousNoteEnd - song[nextRenderNoteIndex - 1].getStart();
+                    }
                     if ((diffSinceBeginning - previousNoteRenderStart) < previousNoteLength)
                     {
                         bool* notes = song[nextRenderNoteIndex - 1].getNotes();
@@ -205,14 +263,14 @@ int main()
                     {
                         if (i == NB_SQUARES - 1)
                         {
-                            cout << "|_" << displayArray[i][j] << "_";
+                            displayString += "|_" + displayArray[i][j] + "_";
                         }
                         else
                         {
-                            cout << "| " << displayArray[i][j] << " ";
+                            displayString += "| " + displayArray[i][j] + " ";
                         }
                     }
-                    cout << "|" << endl;
+                    displayString += "|\n";
                 }
                 
 
@@ -237,14 +295,21 @@ int main()
                 displayArray[0][3] = " ";
                 displayArray[0][4] = " ";
 
-                cout << endl;
-                cout << "Timestamp " << diffSinceBeginning << " ms" << endl;
-                cout << "Nb notes reussies : " << nbNotesCorrect << endl;
+                displayString += "\n";
+                string timestampString = to_string(diffSinceBeginning);
+                string nbNotesCorrectesString = to_string(nbNotesCorrect);
+                string streakString = to_string(NotesCorrectStreak);
+                string holdTimeString = to_string(points);
+                displayString += "Timestamp " + timestampString.substr(0, timestampString.find(".")) + " ms\n";
+                displayString += "Nb notes reussies : " + nbNotesCorrectesString.substr(0, nbNotesCorrectesString.find(".")) + "\n";
+                displayString += "Nb notes de suite : " + streakString.substr(0, streakString.find(".")) + "\n";
+                displayString += "Points : " + holdTimeString.substr(0, holdTimeString.find(".")) + "\n";
+
+                cout << displayString;
             }
         }
     }
-    
-    cout << endl << testInt << endl;
+
     return 0;
 }
 
@@ -298,7 +363,7 @@ int main()
      while (!isThreadOver)
      {
          //Envoie message Arduino
-         json_envoye["led"] = led_state;
+         json_envoye["led"] = GetLedState();
          if (!SendToSerial(arduino, json_envoye)) {
              cerr << "Erreur lors de l'envoie du message. " << endl;
          }
@@ -332,6 +397,7 @@ int main()
              StrumUp = json_recu[STRUM_UP];
              StrumDown = json_recu[STRUM_DN];
              JoyDir = json_recu[JOY_DIR];
+             IsShaking = json_recu[ACCEL];
 
 
              /*if(led_state == 10) //lorsque la dixieme led est allumee
@@ -376,15 +442,7 @@ int main()
                  led_state = 10;
              }
          }
-         Sleep(200);
-     }
- }
-
- void testThread()
- {
-     while (!isThreadOver)
-     {
-         testInt++;
+         Sleep(1);
      }
  }
 
@@ -422,56 +480,13 @@ int main()
      return wantedValue == buttonState;
  }
 
- //bool ComparePlayedNotes(ChordNote note, bool strumNeeded)
- //{
- //    bool correctlyPlayed = true;
- //    bool* notes = note.getNotes();
-
- //    //cout << "Voulu : " << notes[0];
- //    if (notes[0])
- //    {
- //        if (!Fret1)
- //        {
- //            correctlyPlayed = false;
- //        }
- //    }
- //    //cout << " --- Output : " << correctlyPlayed << endl;;
- //    if (notes[1])
- //    {
- //        if (!Fret2)
- //        {
- //            correctlyPlayed = false;
- //        }
- //    }
- //    if (notes[2])
- //    {
- //        if (!Fret3)
- //        {
- //            correctlyPlayed = false;
- //        }
- //    }
- //    if (notes[3])
- //    {
- //        if (!Fret4)
- //        {
- //            correctlyPlayed = false;
- //        }
- //    }
- //    if (notes[4])
- //    {
- //        if (!Fret5)
- //        {
- //            correctlyPlayed = false;
- //        }
- //    }
- //    if (strumNeeded)
- //    {
- //        if (!StrumUp && !StrumDown)
- //        {
- //            correctlyPlayed = false;
- //        }
- //    }
-
- //    return correctlyPlayed;
- //}
+ int GetLedState()
+ {
+     int ledState = NotesCorrectStreak / 1; // TO BE UPDATED
+     if (ledState > 10)
+     {
+         ledState = 10;
+     }
+     return ledState;
+ }
 
