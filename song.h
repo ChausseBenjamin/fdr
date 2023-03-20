@@ -27,6 +27,15 @@ class Song{
 
     void consolidateChords(int difficulty); // Merge chords with same start/end times
 
+    std::string getChartFile();
+    std::string getTitle();
+    std::string getArtist();
+    std::string getCharter();
+    std::string getAlbum();
+    std::string getYear();
+    std::string getGenre();
+    std::string getAudioFile();
+
   private:
     const std::string chartFile;
     std::string title;

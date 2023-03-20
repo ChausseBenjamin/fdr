@@ -1,6 +1,12 @@
 ﻿[Song]
 {
   Offset = 0
+  Name = "A Chick from Corea (Live)"
+  Artist = "Victor Wooten and Steve Bailey"
+  Album = "A Chick from Corea (Live) (Single)"
+  Year = ", 1993"
+  Charter = "GuitarZero132"
+  Genre = "Jazz Fusion"
   Resolution = 192
   Player2 = bass
   Difficulty = 0

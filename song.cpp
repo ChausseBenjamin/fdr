@@ -287,3 +287,38 @@ void Song::printChords(int difficulty){
   }
   if (expert.size() == 0) std::cout << "No chords found" << std::endl;
 }
+
+
+std::string Song::getChartFile(){
+  return chartFile;
+}
+
+std::string Song::getTitle(){
+  return title;
+}
+
+std::string Song::getArtist(){
+  return artist;
+}
+
+std::string Song::getCharter(){
+  return charter;
+}
+
+std::string Song::getAlbum(){
+  return album;
+}
+
+std::string Song::getYear(){
+  return year;
+}
+
+std::string Song::getGenre(){
+  return genre;
+}
+
+std::string Song::getAudioFile(){
+  return audioFile;
+}
+
+
