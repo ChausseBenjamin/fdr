@@ -27,6 +27,6 @@ class Song {
     std::vector<ChordNote> getChords();
 };
 
-#include "song.cpp"
+//#include "song.cpp"
 #endif // __SONG_H__
 

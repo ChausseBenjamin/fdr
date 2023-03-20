@@ -41,5 +41,5 @@ class ChordNote {
                                           // the expected chord
 };
 
-#include "chordNote.cpp"
+//#include "chordNote.cpp"
 #endif // __CHORDNOTE_H__
