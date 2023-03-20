@@ -43,7 +43,6 @@ int main() {
   /* repertoire[i].consolidateChords(DIFFICULTY_EXPERT); */
   /* repertoire[i].printChords(DIFFICULTY_EXPERT); */
   /* repertoire[i].print(); */
-  while (true) {};
-
   return 0;
+
 };
