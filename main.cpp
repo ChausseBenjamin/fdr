@@ -41,7 +41,7 @@ int GetLedState();
 
 /*---------------------------- Variables globales ---------------------------*/
 SerialPort * arduino; //doit etre un objet global!
-int led_state = 0;
+int LedState = 0;
 int Fret1 = 0;
 int Fret2 = 0;
 int Fret3 = 0;
@@ -52,8 +52,11 @@ int StrumUp = 0;
 int StrumDown = 0;
 int IsShaking = 0;
 int NotesCorrectStreak = 0;
+bool BargraphNeedReset = false;
+bool IsInPowerup = false;
 
 bool isThreadOver = false;
+int StreakWhenLastSend = 0;
 
 int main()
 {
@@ -63,29 +66,61 @@ int main()
     //string com;
     //cout <<"Entrer le port de communication du Arduino: ";
     //cin >> com;
+    const int POWERUP_LENGTH = 10000;
 
     const int NB_SQUARES = 50;
     ChordNote note1(0, 5200, 5600);
-    ChordNote note2(1, 6000, 0);
-    ChordNote note3(2, 6600, 0);
-    ChordNote note4(3, 8000, 0);
+    ChordNote note2(0, 6000, 0);
+    ChordNote note3(0, 6600, 0);
+    ChordNote note4(0, 8000, 0);
     ChordNote note5(0, 9000, 9600);
-    /*ChordNote note6(4, 7200, 7200);
-    ChordNote note7(1, 7400, 7400);
-    ChordNote note8(2, 8000, 8000);
-    ChordNote note9(3, 8600, 8600);
-    ChordNote note10(4, 9000, 9000);*/
+    ChordNote note6(0, 10000, 0);
+    ChordNote note7(0, 11500, 12000);
+    ChordNote note8(0, 12400, 0);
+    ChordNote note9(0, 12600, 0);
+    ChordNote note10(0, 13000, 13400);
 
-    note2.change(0);
+    ChordNote note11(0, 15200, 15600);
+    ChordNote note12(0, 16000, 0);
+    ChordNote note13(0, 16600, 0);
+    ChordNote note14(0, 18000, 0);
+    ChordNote note15(0, 19000, 19600);
+    ChordNote note16(0, 20000, 0);
+    ChordNote note17(0, 21500, 22000);
+    ChordNote note18(0, 22400, 0);
+    ChordNote note19(0, 22600, 0);
+    ChordNote note20(0, 23000, 23400);
+
+    ChordNote note21(0, 25200, 25600);
+    ChordNote note22(0, 26000, 0);
+    ChordNote note23(0, 26600, 0);
+    ChordNote note24(0, 28000, 0);
+    ChordNote note25(0, 29000, 29600);
+
+    /*note2.change(0);
+    note7.change(2);*/
+
+    const int NB_NOTES = 25;
+    ChordNote song[NB_NOTES] = {note1, note2, note3, note4, note5,
+                                note6, note7, note8, note9, note10,
+                                note11, note12, note13, note14, note15,
+                                note16, note17, note18, note19, note20,
+                                note21, note22, note23, note24, note25};
 
     const int FRAMERATE = 100;
     int renderStart = FRAMERATE * (NB_SQUARES);
-    note1.setRenderStart(renderStart);
+
+    for (int i = 0; i < NB_NOTES; i++)
+    {
+        song[i].setRenderStart(renderStart);
+    }
+
+    /*note1.setRenderStart(renderStart);
     note2.setRenderStart(renderStart);
     note3.setRenderStart(renderStart);
     note4.setRenderStart(renderStart);
     note5.setRenderStart(renderStart);
-    /*note6.setRenderStart(renderStart);
+    note6.setRenderStart(renderStart);
     note7.setRenderStart(renderStart);
     note8.setRenderStart(renderStart);
     note9.setRenderStart(renderStart);
@@ -99,9 +134,6 @@ int main()
             displayArray[i][j] = " ";
         }
     }
-    
-    const int NB_NOTES = 5;
-    ChordNote song[NB_NOTES] = {note1, note2, note3, note4, note5};
 
     string com = "com7";
     arduino = new SerialPort(com.c_str(), BAUD);
@@ -121,10 +153,13 @@ int main()
 
     int nextRenderNoteIndex = 0;
     int nextNoteToPlay = 0;
-    int nbNotesCorrect = 0;
+    //int nbNotesCorrect = 0;
     int points = 0;
     bool hasLetGoHold = false;
     int lastCorrectHoldTime = 0;
+
+    int powerupStartTime = 0;
+    int multiplier = 1;
 
     std::thread worker(RcvJsonThread);
 
@@ -133,7 +168,7 @@ int main()
         auto currentTime = chrono::steady_clock::now();
         totalDiff = int(std::chrono::duration_cast <std::chrono::milliseconds>(currentTime - startTime).count());
 
-        if(totalDiff > 10000)//End of song
+        if(totalDiff > 30000)//End of song
         {
             isThreadOver = true;
             worker.join();
@@ -147,28 +182,25 @@ int main()
 
             //CHECK NOTES INPUT
             int nextNoteStart = song[nextNoteToPlay].getStart();
-            /*if (abs(nextNoteStart - diffSinceBeginning) < 25)
-            {
-                isNotePlayedCorrectly = ComparePlayedNotes(song[nextNoteToPlay], false);
-                nextNoteToPlay++;
-                if (isNotePlayedCorrectly)
-                {
-                    nbNotesCorrect++;
-                }
-            }*/
+
             if (abs(nextNoteStart - diffSinceBeginning) < 25 && nextNoteToPlay < NB_NOTES)
             {
                 bool isNotePlayedCorrectly = ComparePlayedNotes(song[nextNoteToPlay], false); //TODO. DEVRA ETRE A TRUE
                 if (isNotePlayedCorrectly)
                 {
                     //cout << " REUSSI A " << diffSinceBeginning << endl;
-                    nbNotesCorrect++;
+                    //nbNotesCorrect++;
                     bool* notes = song[nextNoteToPlay].getNotes();
                     for (int i = 0; i < 5; i++)
                     {
                         if (notes[i])
                         {
-                            points += 100;
+                            multiplier = 1;
+                            if (IsInPowerup)
+                            {
+                                multiplier = 2;
+                            }
+                            points += 100 * multiplier;
                         }
                     }
                     nextNoteToPlay++;
@@ -181,6 +213,7 @@ int main()
             {
                 nextNoteToPlay++;
                 NotesCorrectStreak = 0;
+                StreakWhenLastSend = 0;
                 //Enlever des points ????
             }
 
@@ -199,7 +232,21 @@ int main()
                     {
                         if (lastCorrectHoldTime >= song[nextNoteToPlay - 1].getStart())
                         {
-                            points += diffSinceBeginning - lastCorrectHoldTime;
+                            bool* notes = song[nextNoteToPlay - 1].getNotes();
+                            int nbHeldNotes = 0;
+                            for (int i = 0; i < 5; i++)
+                            {
+                                if (notes[i])
+                                {
+                                    nbHeldNotes++;
+                                }
+                            }
+                            multiplier = 1;
+                            if (IsInPowerup)
+                            {
+                                multiplier = 2;
+                            }
+                            points += ((diffSinceBeginning - lastCorrectHoldTime) * nbHeldNotes) * multiplier;
                         }
                         lastCorrectHoldTime = diffSinceBeginning;
                     }
@@ -210,6 +257,16 @@ int main()
                 }
             }
 
+            if (IsShaking && LedState == 10)
+            {
+                IsInPowerup = true;
+                powerupStartTime = diffSinceBeginning;
+            }
+            if (IsInPowerup && diffSinceBeginning - powerupStartTime > POWERUP_LENGTH)
+            {
+                IsInPowerup = false;
+                BargraphNeedReset = true;
+            }
 
             //Gestion affichage            
             if(diffSinceBeginning % FRAMERATE == 0)
@@ -297,13 +354,22 @@ int main()
 
                 displayString += "\n";
                 string timestampString = to_string(diffSinceBeginning);
-                string nbNotesCorrectesString = to_string(nbNotesCorrect);
+                string ledStateString = to_string(LedState);
                 string streakString = to_string(NotesCorrectStreak);
                 string holdTimeString = to_string(points);
+                string multiplierString = to_string(multiplier);
                 displayString += "Timestamp " + timestampString.substr(0, timestampString.find(".")) + " ms\n";
-                displayString += "Nb notes reussies : " + nbNotesCorrectesString.substr(0, nbNotesCorrectesString.find(".")) + "\n";
+                displayString += "Nb LEDs : " + ledStateString.substr(0, ledStateString.find(".")) + "/10\n";
                 displayString += "Nb notes de suite : " + streakString.substr(0, streakString.find(".")) + "\n";
                 displayString += "Points : " + holdTimeString.substr(0, holdTimeString.find(".")) + "\n";
+                if (IsInPowerup)
+                {
+                    displayString += "Multiplicateur : x" + multiplierString.substr(0, multiplierString.find(".")) + " --- POWERUP !!!!!\n";
+                }
+                else
+                {
+                    displayString += "Multiplicateur : x" + multiplierString.substr(0, multiplierString.find(".")) + "\n";
+                }
 
                 cout << displayString;
             }
@@ -412,7 +478,7 @@ int main()
                  double elapsed_time_ms = double(std::chrono::duration_cast <std::chrono::milliseconds> (now - start).count());
                  std::cout << "Temps ecouleyy : " << elapsed_time_ms/1e3 << " secondes" << std::endl;
              }*/
-             if (JoyDir == 4)
+             /*if (JoyDir == 4)
              {
                  led_state += 1;
              }
@@ -440,7 +506,7 @@ int main()
              if (led_state < 0)
              {
                  led_state = 10;
-             }
+             }*/
          }
          Sleep(1);
      }
@@ -482,11 +548,32 @@ int main()
 
  int GetLedState()
  {
-     int ledState = NotesCorrectStreak / 1; // TO BE UPDATED
-     if (ledState > 10)
+     if (IsInPowerup)
      {
-         ledState = 10;
+         LedState++;
+         if (LedState > 10)
+         {
+             LedState = 0;
+         }
      }
-     return ledState;
+     else
+     {
+         if (NotesCorrectStreak % 1 == 0 && StreakWhenLastSend < NotesCorrectStreak)
+         {
+             LedState++;
+             StreakWhenLastSend = NotesCorrectStreak;
+         }
+         if (LedState > 10)
+         {
+             LedState = 10;
+         }
+         if (BargraphNeedReset)
+         {
+             LedState = 0;
+             BargraphNeedReset = false;
+             StreakWhenLastSend = 0;
+         }
+     }
+     return LedState;
  }
 
