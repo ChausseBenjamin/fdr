@@ -96,8 +96,11 @@ void ChordNote::print(){
 
 // Trim all timings to milliseconds
 void ChordNote::trim(){
-  start = start/1000000;
-  end   = end/1000000;
+  start = start/1000;
+  if (end != 0)
+  {
+      end = end / 1000;
+  }
 }
 
 // }}}

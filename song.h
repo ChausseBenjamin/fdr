@@ -37,6 +37,11 @@ class Song{
     std::string getGenre();
     std::string getAudioFile();
 
+    std::vector<ChordNote> easy;
+    std::vector<ChordNote> medium;
+    std::vector<ChordNote> hard;
+    std::vector<ChordNote> expert;
+
   private:
     const std::string chartFile;
     std::string title;
@@ -49,10 +54,6 @@ class Song{
     bool difficulty[4]; // Which difficulties are available
     int resolution;
     std::vector<Timestamp> timestamps;
-    std::vector<ChordNote> easy;
-    std::vector<ChordNote> medium;
-    std::vector<ChordNote> hard;
-    std::vector<ChordNote> expert;
 };
 
 //#include "song.cpp"

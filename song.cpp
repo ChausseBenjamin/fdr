@@ -323,8 +323,11 @@ std::string Song::getAudioFile(){
 
 void Song::trim(int difficulty){
   // TODO: make this fuction use the difficulty parameter
-  std::vector<ChordNote>*chords = &expert;
-  chords->trim();
+  //std::vector<ChordNote> *chords = &expert;
+  for (int i = 0; i < expert.size(); i++)
+  {
+      expert[i].trim();
+  }
 }
 
 
