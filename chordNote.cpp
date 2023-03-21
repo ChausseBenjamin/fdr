@@ -11,7 +11,7 @@ ChordNote::ChordNote(int btn, int startTime, int endTime) {
 
 ChordNote::~ChordNote() {};
 
-void ChordNote::change(int button) {
+void ChordNote::toggle(int button) {
   notes[button] = !notes[button];
 };
 

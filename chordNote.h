@@ -27,7 +27,7 @@ class ChordNote {
     // that the chord is held for longer than the default 1/16th note.
     ChordNote(int btn, int startTime, int endTime);
     ~ChordNote();
-    void  change(int button);             // change note in existing chord
+    void  toggle(int button);             // change note in existing chord
     void  setRenderStart(int renderTime); // sets when to start rendering
     bool* getNotes();                     // get the notes in the chord
     int   getStart();                     // get the start time of the chord
