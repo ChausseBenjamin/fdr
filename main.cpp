@@ -57,6 +57,25 @@ bool isThreadOver = false;
 
 int main()
 {
+
+    vector<Song> repertoire;    //Liste des chansons disponibles:
+    vector<string> songFolders; //Liste des dossiers chansons disponibles:
+    songFolders.push_back("/Maynard-Ferguson-Birdland/");
+    songFolders.push_back("/Maynard-Ferguson-Country-Road-(James-Taylor-Cover)/");
+    songFolders.push_back("/Maynard-Ferguson-Theme-From-Shaft/");
+    songFolders.push_back("/Owane-Rock-Is-Too-Heavy/");
+    songFolders.push_back("/Stevie-Wonder-Contusion/");
+    songFolders.push_back("/Victor-Wooten-and-Steve-Bailey-A-Chick-from-Corea-(Live)/"+chartFile);
+
+    string songRoot = "./songs";
+    string chartFile = "notes.chart";
+    for (int i = 0; i < songFolders.size(); i++)
+    {
+        repertoire.push_back(Song(songRoot + songFolders[i] + chartFile));
+    }
+
+
+
     string displayString;
 
     // Initialisation du port de communication

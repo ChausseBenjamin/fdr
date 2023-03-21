@@ -1,52 +1,98 @@
 #include "chordNote.h"
 
-ChordNote::ChordNote(int btn, int startTime, int endTime) {
-  start = startTime;
-  end = endTime;
-  for (int i=0; i<5; i++) {
-    notes[i] = false;
-  }
-  notes[btn] = true;
+// Constructors, Destructors & Operators {{{
+
+// All notes are known
+ChordNote::ChordNote(bool notes[5], int start, int end):
+  start(start), end(end){
+  for(int i=0; i<5; i++) this->notes[i] = notes[i];
 };
 
+// Used when chords are created from chartfiles
+ChordNote::ChordNote(int note, int start, int end):
+  start(start), end(end){
+  for(int i=0; i<5; i++) (notes[i] = (i==note));
+};
+
+// Copy constructor
+ChordNote::ChordNote(const ChordNote& chord):
+  start(chord.start), end(chord.end){
+  for(int i=0; i<5; i++) notes[i] = chord.notes[i];
+};
+
+// Destructor
 ChordNote::~ChordNote() {};
 
-void ChordNote::toggle(int button) {
-  notes[button] = !notes[button];
-};
+// Assignment operator
+ChordNote& ChordNote::operator=(const ChordNote& other) {
+  std::copy(other.notes, other.notes + 5, notes);
+  const_cast<int&>(start) = other.start;
+  const_cast<int&>(end) = other.end;
+  return *this;
+}
 
-void ChordNote::setEnd(int endTime) {
-  end = endTime;
-};
+// }}}
 
-void ChordNote::setRenderStart(int renderTime) {
-  renderStart = start - renderTime;
-};
+// Getters {{{
 
-bool* ChordNote::getNotes() {
+bool* ChordNote::getNotes(){
   return notes;
 };
 
-int ChordNote::getStart() {
+int ChordNote::getStart(){
   return start;
-};
+}
 
-int ChordNote::getEnd() {
+int ChordNote::getEnd(){
   return end;
-};
+}
+
 
 int ChordNote::getRenderStart() {
   return renderStart;
 };
 
-std::regex ChordNote::getRegex() {
-  // empty string
-  std::string regex = "";
-  // true becomes "t" and false becomes "f"
-  // this is used to create a string of 5 characters
-  // which can be used as a regex
+// }}}
+
+// Setters {{{
+
+void ChordNote::setRenderStart(int renderTime) {
+  renderStart = start - renderTime;
+}
+
+// }}}
+
+// Modifiers {{{
+
+// Toggle a note on/off
+bool ChordNote::toggle(int note){
+  notes[note] = !notes[note];
+  return notes[note];
+}
+
+// Merge two chords together
+void ChordNote::merge(ChordNote chord){
   for (int i=0; i<5; i++) {
-    regex += notes[i] ? "t" : "f";
+    this->notes[i] = this->notes[i] || chord.has(i);
   }
-  return std::regex(regex);
-};
+}
+
+// }}}
+
+// Misc {{{
+
+// Check if a note is on (used in merge)
+bool ChordNote::has(int note){
+  return notes[note];
+}
+
+// Print Info about the chord (used for debugging)
+void ChordNote::print(){
+  std::cout << "ChordNote: ";
+  for(int i=0; i<5; i++) std::cout << (notes[i])? "T" : "F";
+  std::cout << "Start: " << start << " End: " << end << std::endl;
+}
+
+// }}}
+
+// vim: syntax=cpp.doxygen
