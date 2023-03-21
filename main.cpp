@@ -60,6 +60,22 @@ int StreakWhenLastSend = 0;
 
 int main()
 {
+    vector<Song> repertoire;    //Liste des chansons disponibles:
+    vector<string> songFolders; //Liste des dossiers chansons disponibles:
+    songFolders.push_back("\\Maynard-Ferguson-Birdland\\");
+    songFolders.push_back("\\Maynard-Ferguson-Country-Road-(James-Taylor-Cover)\\");
+    songFolders.push_back("\\Maynard-Ferguson-Theme-From-Shaft\\");
+    songFolders.push_back("\\Owane-Rock-Is-Too-Heavy\\");
+    songFolders.push_back("\\Stevie-Wonder-Contusion\\");
+    songFolders.push_back("\\Victor-Wooten-and-Steve-Bailey-A-Chick-from-Corea-(Live)\\");
+
+    string songRoot = "..\\songs";
+    string chartFile = "notes.chart";
+    for (int i = 0; i < songFolders.size(); i++)
+    {
+        repertoire.push_back(Song(songRoot + songFolders[i] + chartFile));
+    }
+
     string displayString;
 
     // Initialisation du port de communication
@@ -97,6 +113,8 @@ int main()
     ChordNote note24(0, 28000, 0);
     ChordNote note25(0, 29000, 29600);
 
+
+    note2.toggle(0);
     /*note2.change(0);
     note7.change(2);*/
 
@@ -125,7 +143,7 @@ int main()
     note8.setRenderStart(renderStart);
     note9.setRenderStart(renderStart);
     note10.setRenderStart(renderStart);*/
-    
+
     string displayArray[NB_SQUARES + 1][5];
     for (int i = 0; i < NB_SQUARES + 1; i++)
     {
@@ -142,8 +160,8 @@ int main()
          cerr << "Impossible de se connecter au port "<< string(com.c_str()) <<". Fermeture du programme!" <<endl;
          exit(1);
      }
-    
-    // Structure de donnees JSON pour envoie et reception    
+
+    // Structure de donnees JSON pour envoie et reception
     json j_msg_send, j_msg_rcv;
 
     auto startTime = chrono::steady_clock::now();
@@ -268,7 +286,7 @@ int main()
                 BargraphNeedReset = true;
             }
 
-            //Gestion affichage            
+            //Gestion affichage
             if(diffSinceBeginning % FRAMERATE == 0)
             {
                 //system("cls");
@@ -329,7 +347,7 @@ int main()
                     }
                     displayString += "|\n";
                 }
-                
+
 
                 //Reordering
                 int reorderingIndex = NB_SQUARES;
@@ -399,7 +417,7 @@ int main()
      // Read serialport until '\n' character (Blocking)
 
      // Version fonctionnel dans VScode, mais non fonctionnel avec Visual Studio
- /*  
+ /*
      while(msg.back()!='\n'){
          if(msg.size()>MSG_MAX_SIZE){
              return false;
@@ -529,7 +547,7 @@ int main()
          {
              bool compDown = CompareIndividualButton(true, StrumDown);
              bool compUp = CompareIndividualButton(true, StrumUp);
-             
+
              if (compDown || compUp)
              {
                  correctlyPlayed = true;

@@ -1,32 +1,59 @@
-#ifndef __SONG_H__
-#define __SONG_H__
+#ifndef SONG_H
+#define SONG_H
 
-#include "chordNote.h"
+#include <string>
 #include <vector>
 
-// Contains a song for a guitar hero clone
-class Song {
-  private:
-    std::string title;
-    std::string artist;
-    int duration;     // in ms
-    std::string audioFile; // path to audio file
-    std::vector<ChordNote> chords;
+#include "chordNote.h"
+#include "timestamp.h"
+
+#define DIFFICULTY_EASY   0
+#define DIFFICULTY_MEDIUM 1
+#define DIFFICULTY_HARD   2
+#define DIFFICULTY_EXPERT 3
+
+class Song{
   public:
     Song(std::string chartFile);
     ~Song();
-    void consolidate(); // merges chords with the same start/end times
-                        // into a single chord
-    ChordNote operator[](int index);
-    int size();
 
+    void parseInfo(); // info from "Song" section
+    void parseSync(); // timestamps from "SyncTrack" section
+    bool parseChords(int difficulty); // chords from "Events" section
+
+    void print();
+    void printTimestamps();
+    void printChords(int difficulty);
+
+    void consolidateChords(int difficulty); // Merge chords with same start/end times
+
+    std::string getChartFile();
     std::string getTitle();
     std::string getArtist();
-    int getDuration();
+    std::string getCharter();
+    std::string getAlbum();
+    std::string getYear();
+    std::string getGenre();
     std::string getAudioFile();
-    std::vector<ChordNote> getChords();
+
+  private:
+    const std::string chartFile;
+    std::string title;
+    std::string artist;
+    std::string charter;
+    std::string album;
+    std::string year;
+    std::string genre;
+    std::string audioFile;
+    bool difficulty[4]; // Which difficulties are available
+    int resolution;
+    std::vector<Timestamp> timestamps;
+    std::vector<ChordNote> easy;
+    std::vector<ChordNote> medium;
+    std::vector<ChordNote> hard;
+    std::vector<ChordNote> expert;
 };
 
 //#include "song.cpp"
-#endif // __SONG_H__
-
+#endif // SONG_H
+// vim: syntax=cpp.doxygen
