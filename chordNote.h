@@ -1,8 +1,6 @@
 #ifndef __CHORDNOTE_H__
 #define __CHORDNOTE_H__
 
-#include <regex>
-
 // Chords are used to represent a set of notes that are played together.
 // For this guitar hero implementation, a single note is technically a chord.
 // This analogy is used to make sure that simultaneous notes are always grouped
@@ -30,13 +28,11 @@ class ChordNote {
     ChordNote(int btn, int startTime, int endTime);
     ~ChordNote();
     void  change(int button);             // change note in existing chord
-    void  setEnd(int endTime);            // set the end time of the chord
     void  setRenderStart(int renderTime); // sets when to start rendering
     bool* getNotes();                     // get the notes in the chord
     int   getStart();                     // get the start time of the chord
     int   getEnd();                       // get the end time of the chord
     int   getRenderStart();               // get the render time of the chord
-    std::regex getRegex();                // regex for this chord
                                           // compares the player's input to
                                           // the expected chord
 };
