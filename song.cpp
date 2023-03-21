@@ -156,18 +156,31 @@ void Song::printTimestamps(){
 }
 
 bool Song::parseChords(int difficulty){
-  // List of chords for each difficulty
-  const std::vector<ChordNote> *chordDifficulties[4]={&easy,&medium,&hard,&expert};
-  // List of patterns to stringPattern
-  const std::string patterns[4] = {
-    "EasySingle", "MediumSingle", "HardSingle", "ExpertSingle"
-  };
-  // We set the stringPattern to match depending on the difficulty
-  /* std::string stringPattern = patterns[difficulty]; */
-  std::string stringPattern = "ExpertSingle";
   // We set a chord vector to store point to the correct difficulty vector
-  /* std::vector<ChordNote>*chords=(std::vector<ChordNote>*)chordDifficulties[difficulty]; */
-  std::vector<ChordNote>*chords = &expert;
+  std::vector<ChordNote>*chords;
+  // We set the stringPattern to match depending on the difficulty
+  std::string stringPattern;
+  switch (difficulty){
+    case DIFFICULTY_EASY:
+      stringPattern = "EasySingle";
+      std::vector<ChordNote>*chords = &easy;
+      break;
+    case DIFFICULTY_MEDIUM:
+      stringPattern = "MediumSingle";
+      std::vector<ChordNote>*chords = &medium;
+      break;
+    case DIFFICULTY_HARD:
+      stringPattern = "HardSingle";
+      std::vector<ChordNote>*chords = &hard;
+      break;
+    case DIFFICULTY_EXPERT:
+      stringPattern = "ExpertSingle";
+      std::vector<ChordNote>*chords = &expert;
+      break;
+    default:
+      std::cerr << "Invalid difficulty" << std::endl;
+      return false;
+  }
   // We open the chart file
   std::ifstream file(chartFile);
   if (!file.is_open()) {
@@ -231,6 +244,23 @@ bool Song::parseChords(int difficulty){
           #endif // DEBUG
           // Create a new chord and add it to the vector
           chords->push_back(ChordNote(fret, chordTime, chordEnd));
+          /* switch (difficulty){ */
+          /*   case DIFFICULTY_EASY: */
+          /*     easy.push_back(ChordNote(fret, chordTime, chordEnd)); */
+          /*     break; */
+          /*   case DIFFICULTY_MEDIUM: */
+          /*     medium.push_back(ChordNote(fret, chordTime, chordEnd)); */
+          /*     break; */
+          /*   case DIFFICULTY_HARD: */
+          /*     hard.push_back(ChordNote(fret, chordTime, chordEnd)); */
+          /*     break; */
+          /*   case DIFFICULTY_EXPERT: */
+          /*     expert.push_back(ChordNote(fret, chordTime, chordEnd)); */
+          /*     break; */
+          /*   default: */
+          /*     std::cerr << "Invalid difficulty" << std::endl; */
+          /*     return false; */
+          /* } */
         }
         else if (line.find("[") != std::string::npos) return true;
       }
@@ -242,7 +272,24 @@ bool Song::parseChords(int difficulty){
 
 void Song::consolidateChords(int difficulty){
   // TODO: make this fuction use the difficulty parameter
-  std::vector<ChordNote>*chords = &expert;
+  std::vector<ChordNote>*chords;
+  switch (difficulty){
+    case DIFFICULTY_EASY:
+      std::vector<ChordNote>*chords = &easy;
+      break;
+    case DIFFICULTY_MEDIUM:
+      std::vector<ChordNote>*chords = &medium;
+      break;
+    case DIFFICULTY_HARD:
+      std::vector<ChordNote>*chords = &hard;
+      break;
+    case DIFFICULTY_EXPERT:
+      std::vector<ChordNote>*chords = &expert;
+      break;
+    default:
+      std::cerr << "Invalid difficulty" << std::endl;
+      return;
+  }
   // Number of chords in the vector
   int chordSize = chords->size();
   // Go through all the chords
@@ -282,6 +329,7 @@ void Song::consolidateChords(int difficulty){
 }
 
 void Song::printChords(int difficulty){
+  // TODO: make this fuction use the difficulty parameter
   for (int i=0; i<expert.size(); i++){
     expert[i].print();
   }

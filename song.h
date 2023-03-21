@@ -14,20 +14,21 @@
 
 class Song{
   public:
+    // Constructors/Destructors
     Song(std::string chartFile);
     ~Song();
-
-    void parseInfo(); // info from "Song" section
-    void parseSync(); // timestamps from "SyncTrack" section
-    bool parseChords(int difficulty); // chords from "Events" section
-
+    // Pre-Processing
+    void parseInfo();                         // info from "Song" section
+    void parseSync();                         // timestamps from "SyncTrack" section
+    bool parseChords(int difficulty=0);       // chords from "Events" section
+    void consolidateChords(int difficulty=0); // Merge chords with same start/end times
+    void trim(int difficulty);                // Trim chord timings from
+                                              // nanoseconds to milliseconds
+    // Print statements for debugging
     void print();
     void printTimestamps();
-    void printChords(int difficulty);
-
-    void consolidateChords(int difficulty); // Merge chords with same start/end times
-    void trim(int difficulty); // Trim chord timings from nanoseconds to milliseconds
-
+    void printChords(int difficulty=0);
+    // Getters
     std::string getChartFile();
     std::string getTitle();
     std::string getArtist();
@@ -36,12 +37,11 @@ class Song{
     std::string getYear();
     std::string getGenre();
     std::string getAudioFile();
-
+    // Public variables (Chord vectors for each difficulty) TODO: Make private
     std::vector<ChordNote> easy;
     std::vector<ChordNote> medium;
     std::vector<ChordNote> hard;
     std::vector<ChordNote> expert;
-
   private:
     const std::string chartFile;
     std::string title;
