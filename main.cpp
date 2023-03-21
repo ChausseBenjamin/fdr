@@ -176,6 +176,8 @@ int main()
     json j_msg_send, j_msg_rcv;
 
     auto startTime = chrono::steady_clock::now();
+    // TODO: Check if this command works as intended:
+    /* PlaySound(TEXT(song.getAudioFile().c_str()), NULL, SND_ASYNC); */
     double totalDiff = 0;
     auto lastPrintTime = chrono::steady_clock::now();;
     bool SongNotDone = true;

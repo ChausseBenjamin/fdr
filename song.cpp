@@ -9,6 +9,9 @@
 #include "common.h"
 
 Song::Song(std::string chartFile): chartFile(chartFile){
+  // substitute "notes.chart" for "song.wav"
+  string audioFile = chartFile;
+  audioFile.replace(audioFile.find("notes.chart"), 12, "song.wav");
   parseInfo();
   parseSync();
   /* for(int i = 0; i < 4; i++){ */
@@ -271,7 +274,6 @@ bool Song::parseChords(int difficulty){
 
 
 void Song::consolidateChords(int difficulty){
-  // TODO: make this fuction use the difficulty parameter
   std::vector<ChordNote>*chords;
   switch (difficulty){
     case DIFFICULTY_EASY:
