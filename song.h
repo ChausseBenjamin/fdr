@@ -26,6 +26,7 @@ class Song{
     void printChords(int difficulty);
 
     void consolidateChords(int difficulty); // Merge chords with same start/end times
+    void trim(int difficulty); // Trim chord timings from nanoseconds to milliseconds
 
     std::string getChartFile();
     std::string getTitle();

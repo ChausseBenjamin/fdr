@@ -16,8 +16,8 @@
 
 class ChordNote {
   private:
-    const int start;  // Time in Nanoseconds
-    const int end;    // 0 if not set
+    int start;  // Time in Nanoseconds
+    int end;    // 0 if not set
     bool notes[5];    // Which notes are in the chord
     int  renderStart; // Time in Nanoseconds
     // Chords are initialized with a single button.
@@ -45,6 +45,7 @@ class ChordNote {
     // Misc:
     bool  has(int note);          // check if a note is in the chord
     void  print();                // For debugging
+    void  trim();                 // Trim all timings to milliseconds
 };
 
 //#include "chordNote.cpp"

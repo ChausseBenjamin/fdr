@@ -94,6 +94,12 @@ void ChordNote::print(){
   std::cout << "Start: " << start << " End: " << end << std::endl;
 }
 
+// Trim all timings to milliseconds
+void ChordNote::trim(){
+  start = start/1000000;
+  end   = end/1000000;
+}
+
 // }}}
 
 // vim: syntax=cpp.doxygen

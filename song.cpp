@@ -321,5 +321,11 @@ std::string Song::getAudioFile(){
   return audioFile;
 }
 
+void Song::trim(int difficulty){
+  // TODO: make this fuction use the difficulty parameter
+  std::vector<ChordNote>*chords = &expert;
+  chords->trim();
+}
+
 
 // vim: syntax=cpp.doxygen

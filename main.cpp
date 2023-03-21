@@ -75,6 +75,15 @@ int main()
     {
         repertoire.push_back(Song(songRoot + songFolders[i] + chartFile));
     }
+    // Parse all the songs
+    for (int i = 0; i < repertoire.size(); i++)
+    {
+        repertoire[i].parseSync();
+        repertoire[i].parseChords(0);
+        repertoire[i].consolidateChords(0);
+        repertoire[i].trim(0);
+        cout << repertoire[i].getTitle() << " parsed!" << endl;
+    }
 
     string displayString;
 
