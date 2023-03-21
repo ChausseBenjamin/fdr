@@ -65,7 +65,7 @@ int main()
     songFolders.push_back("/Maynard-Ferguson-Theme-From-Shaft/");
     songFolders.push_back("/Owane-Rock-Is-Too-Heavy/");
     songFolders.push_back("/Stevie-Wonder-Contusion/");
-    songFolders.push_back("/Victor-Wooten-and-Steve-Bailey-A-Chick-from-Corea-(Live)/"+chartFile);
+    songFolders.push_back("/Victor-Wooten-and-Steve-Bailey-A-Chick-from-Corea-(Live)/");
 
     string songRoot = "./songs";
     string chartFile = "notes.chart";
