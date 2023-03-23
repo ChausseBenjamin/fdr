@@ -71,6 +71,10 @@ int main()
     vector<Song> repertoire;    //Liste des chansons disponibles:
     vector<string> songFolders; //Liste des dossiers chansons disponibles:
     songFolders.push_back("\\Maynard-Ferguson-Birdland\\");
+    songFolders.push_back("\\Greta-Van-Fleet-Highway-Tune\\");
+    songFolders.push_back("\\Joan-Jett-and-the-Blackhearts-I-Love-Rock-_N-Roll-(The-Arrows-Cover)\\");
+    songFolders.push_back("\\Santana-Oye-Como-Va-(Tito-Puente-Cover)\\");
+    songFolders.push_back("\\Symphony-X-Eve-of-Seduction\\");
     //songFolders.push_back("\\Maynard-Ferguson-Country-Road-(James-Taylor-Cover)\\");
     //songFolders.push_back("\\Maynard-Ferguson-Theme-From-Shaft\\");
     //songFolders.push_back("\\Owane-Rock-Is-Too-Heavy\\");
@@ -735,7 +739,7 @@ int main()
  //    //    system("CLS");
  //    //    cout << "Le jeu va debuter...!!\n" << endl;
  //    //    if (*numeroChanson < 1 || *numeroChanson > 4 || *niveauDifficulte < 1 || *niveauDifficulte > 4) {
- //    //        //chanson et difficulte par defaut 
+ //    //        //chanson et difficulte par defaut
  //    //        *numeroChanson = 1;
  //    //        *niveauDifficulte = 1;
  //    //    }
@@ -828,13 +832,13 @@ int main()
                  {
                      wantToReturn = true;
                  }
-                 
+
                  niveauDifficulte -= 1;
                  //case 3:
                  //    system("CLS");
                  //    cout << "Le jeu va debuter...!!\n" << endl;
                  //    if (*numeroChanson < 1 || *numeroChanson > 4 || *niveauDifficulte < 1 || *niveauDifficulte > 4) {
-                 //        //chanson et difficulte par defaut 
+                 //        //chanson et difficulte par defaut
                  //        *numeroChanson = 1;
                  //        *niveauDifficulte = 1;
                  //    }
@@ -849,7 +853,7 @@ int main()
                  madeADecision = true;
                  retour = true;
              }
-             
+
              break;
 
          case 2:
