@@ -37,7 +37,10 @@ bool RcvFromSerial(SerialPort *arduino, string &msg);
 void RcvJsonThread();
 bool ComparePlayedNotes(ChordNote note, bool strumNeeded);
 bool CompareIndividualButton(bool wantedValue, int buttonState);
+bool CompareStrums();
 int GetLedState();
+int displayMenu();
+bool MenuInitialisation(int& numeroChanson, int& niveauDifficulte, vector<Song> repo);
 
 /*---------------------------- Variables globales ---------------------------*/
 SerialPort * arduino; //doit etre un objet global!
@@ -54,20 +57,25 @@ int IsShaking = 0;
 int NotesCorrectStreak = 0;
 bool BargraphNeedReset = false;
 bool IsInPowerup = false;
+int consecutiveStrumUP = 0;
+int consecutiveStrumDN = 0;
 
 bool isThreadOver = false;
 int StreakWhenLastSend = 0;
+bool isSameStrumUP = true;
+bool isSameStrumDN = true;
+
 
 int main()
 {
     vector<Song> repertoire;    //Liste des chansons disponibles:
     vector<string> songFolders; //Liste des dossiers chansons disponibles:
     songFolders.push_back("\\Maynard-Ferguson-Birdland\\");
-    songFolders.push_back("\\Maynard-Ferguson-Country-Road-(James-Taylor-Cover)\\");
-    songFolders.push_back("\\Maynard-Ferguson-Theme-From-Shaft\\");
-    songFolders.push_back("\\Owane-Rock-Is-Too-Heavy\\");
-    songFolders.push_back("\\Stevie-Wonder-Contusion\\");
-    songFolders.push_back("\\Victor-Wooten-and-Steve-Bailey-A-Chick-from-Corea-(Live)\\");
+    //songFolders.push_back("\\Maynard-Ferguson-Country-Road-(James-Taylor-Cover)\\");
+    //songFolders.push_back("\\Maynard-Ferguson-Theme-From-Shaft\\");
+    //songFolders.push_back("\\Owane-Rock-Is-Too-Heavy\\");
+    //songFolders.push_back("\\Stevie-Wonder-Contusion\\");
+    //songFolders.push_back("\\Victor-Wooten-and-Steve-Bailey-A-Chick-from-Corea-(Live)\\");
 
     string songRoot = "..\\songs";
     string chartFile = "notes.chart";
@@ -76,329 +84,340 @@ int main()
         repertoire.push_back(Song(songRoot + songFolders[i] + chartFile));
     }
     // Parse all the songs
-    for (int i = 0; i < repertoire.size(); i++)
+    for (int difficulty = 0; difficulty < 4; difficulty++)
     {
-        repertoire[i].parseSync();
-        repertoire[i].parseChords(0);
-        repertoire[i].consolidateChords(0);
-        repertoire[i].trim(0);
-        cout << repertoire[i].getTitle() << " parsed!" << endl;
-    }
-
-    std::vector<ChordNote> song = repertoire[0].expert;
-
-    string displayString;
-
-    // Initialisation du port de communication
-    //string com;
-    //cout <<"Entrer le port de communication du Arduino: ";
-    //cin >> com;
-    const int POWERUP_LENGTH = 5000;
-
-    const int NB_SQUARES = 50;
-    //ChordNote note1(0, 5200, 5600);
-    //ChordNote note2(0, 6000, 0);
-    //ChordNote note3(0, 6600, 0);
-    //ChordNote note4(0, 8000, 0);
-    //ChordNote note5(0, 9000, 9600);
-    //ChordNote note6(0, 10000, 0);
-    //ChordNote note7(0, 11500, 12000);
-    //ChordNote note8(0, 12400, 0);
-    //ChordNote note9(0, 12600, 0);
-    //ChordNote note10(0, 13000, 13400);
-
-    //ChordNote note11(0, 15200, 15600);
-    //ChordNote note12(0, 16000, 0);
-    //ChordNote note13(0, 16600, 0);
-    //ChordNote note14(0, 18000, 0);
-    //ChordNote note15(0, 19000, 19600);
-    //ChordNote note16(0, 20000, 0);
-    //ChordNote note17(0, 21500, 22000);
-    //ChordNote note18(0, 22400, 0);
-    //ChordNote note19(0, 22600, 0);
-    //ChordNote note20(0, 23000, 23400);
-
-    //ChordNote note21(0, 25200, 25600);
-    //ChordNote note22(0, 26000, 0);
-    //ChordNote note23(0, 26600, 0);
-    //ChordNote note24(0, 28000, 0);
-    //ChordNote note25(0, 29000, 29600);
-
-
-    //note2.toggle(0);
-    ///*note2.change(0);
-    //note7.change(2);*/
-
-    //const int NB_NOTES = 25;
-    //ChordNote song[NB_NOTES] = {note1, note2, note3, note4, note5,
-    //                            note6, note7, note8, note9, note10,
-    //                            note11, note12, note13, note14, note15,
-    //                            note16, note17, note18, note19, note20,
-    //                            note21, note22, note23, note24, note25};
-
-    const int FRAMERATE = 50;
-    int renderStart = FRAMERATE * (NB_SQUARES);
-
-    for (int i = 0; i < song.size(); i++)
-    {
-        song[i].setRenderStart(renderStart);
-    }
-
-    /*note1.setRenderStart(renderStart);
-    note2.setRenderStart(renderStart);
-    note3.setRenderStart(renderStart);
-    note4.setRenderStart(renderStart);
-    note5.setRenderStart(renderStart);
-    note6.setRenderStart(renderStart);
-    note7.setRenderStart(renderStart);
-    note8.setRenderStart(renderStart);
-    note9.setRenderStart(renderStart);
-    note10.setRenderStart(renderStart);*/
-
-    string displayArray[NB_SQUARES + 1][5];
-    for (int i = 0; i < NB_SQUARES + 1; i++)
-    {
-        for (int j = 0; j < 5; j++)
+        for (int i = 0; i < repertoire.size(); i++)
         {
-            displayArray[i][j] = " ";
+            repertoire[i].parseSync();
+            repertoire[i].parseChords(difficulty);
+            repertoire[i].consolidateChords(difficulty);
+            repertoire[i].trim(difficulty);
+            cout << repertoire[i].getTitle() << " parsed!" << endl;
         }
     }
 
-    string com = "com7";
-    arduino = new SerialPort(com.c_str(), BAUD);
-
-     if(!arduino->isConnected()){
-         cerr << "Impossible de se connecter au port "<< string(com.c_str()) <<". Fermeture du programme!" <<endl;
-         exit(1);
-     }
-
-    // Structure de donnees JSON pour envoie et reception
-    json j_msg_send, j_msg_rcv;
-
-    auto startTime = chrono::steady_clock::now();
-    // TODO: Check if this command works as intended:
-    /* PlaySound(TEXT(song.getAudioFile().c_str()), NULL, SND_ASYNC); */
-    double totalDiff = 0;
-    auto lastPrintTime = chrono::steady_clock::now();;
-    bool SongNotDone = true;
-
-    int nextRenderNoteIndex = 0;
-    int nextNoteToPlay = 0;
-    //int nbNotesCorrect = 0;
-    int points = 0;
-    bool hasLetGoHold = false;
-    int lastCorrectHoldTime = 0;
-
-    int powerupStartTime = 0;
-    int powerupModifier = 1;
-
-    std::thread worker(RcvJsonThread);
-
-    while (SongNotDone)
+    int songIndex;
+    int difficulty;
+    bool wantToPlay = MenuInitialisation(songIndex, difficulty, repertoire);
+    if (wantToPlay)
     {
-        auto currentTime = chrono::steady_clock::now();
-        totalDiff = int(std::chrono::duration_cast <std::chrono::milliseconds>(currentTime - startTime).count());
-
-        //if(totalDiff > 30000)//End of song
-        if (nextNoteToPlay == song.size())
+        std::vector<ChordNote> song;
+        switch (difficulty)
         {
-            isThreadOver = true;
-            worker.join();
-            SongNotDone = false;
+        case (DIFFICULTY_EASY):
+            song = repertoire[songIndex].easy;
+            break;
+        case (DIFFICULTY_MEDIUM):
+            song = repertoire[songIndex].medium;
+            break;
+        case (DIFFICULTY_HARD):
+            song = repertoire[songIndex].hard;
+            break;
+        case (DIFFICULTY_EXPERT):
+            song = repertoire[songIndex].expert;
+            break;
+        default:
+            std::cerr << "Invalid difficulty" << std::endl;
+            return 1;
         }
-        else
+
+
+        string displayString;
+
+        const int POWERUP_LENGTH = 5000;
+
+        const int NB_SQUARES = 50;
+
+        const int FRAMERATE = 50;
+        int renderStart = FRAMERATE * (NB_SQUARES);
+
+        for (int i = 0; i < song.size(); i++)
         {
-            auto newCheckTime = chrono::steady_clock::now();
+            song[i].setRenderStart(renderStart);
+        }
 
-            int diffSinceBeginning = int(std::chrono::duration_cast <std::chrono::milliseconds>(newCheckTime - startTime).count());
-
-            //CHECK NOTES INPUT
-            int nextNoteStart = song[nextNoteToPlay].getStart();
-
-            if (abs(nextNoteStart - diffSinceBeginning) < 25 && nextNoteToPlay < song.size())
+        string displayArray[NB_SQUARES + 1][5];
+        for (int i = 0; i < NB_SQUARES + 1; i++)
+        {
+            for (int j = 0; j < 5; j++)
             {
-                bool isNotePlayedCorrectly = ComparePlayedNotes(song[nextNoteToPlay], false); //TODO. DEVRA ETRE A TRUE
-                if (isNotePlayedCorrectly)
+                displayArray[i][j] = " ";
+            }
+        }
+
+        string com = "com7";
+        arduino = new SerialPort(com.c_str(), BAUD);
+
+        if (!arduino->isConnected()) {
+            cerr << "Impossible de se connecter au port " << string(com.c_str()) << ". Fermeture du programme!" << endl;
+            exit(1);
+        }
+
+        // Structure de donnees JSON pour envoie et reception
+        json j_msg_send, j_msg_rcv;
+
+        auto startTime = chrono::steady_clock::now();
+        // TODO: Check if this command works as intended:
+        /* PlaySound(TEXT(song.getAudioFile().c_str()), NULL, SND_ASYNC); */
+        double totalDiff = 0;
+        auto lastPrintTime = chrono::steady_clock::now();;
+        bool SongNotDone = true;
+
+        int nextRenderNoteIndex = 0;
+        int nextNoteToPlay = 0;
+        //int nbNotesCorrect = 0;
+        int points = 0;
+        bool hasLetGoHold = false;
+        int lastCorrectHoldTime = 0;
+        bool isPreviousNoteReussie = false;
+
+        int powerupStartTime = 0;
+        int powerupModifier = 1;
+        int NbNotesReussies = 0;
+
+        int endOfSong = song[song.size() - 1].getEnd();
+        if (endOfSong == 0)
+        {
+            endOfSong = song[song.size() - 1].getStart();
+        }
+        endOfSong += 500;
+
+        std::thread worker(RcvJsonThread);
+
+        while (SongNotDone)
+        {
+            auto currentTime = chrono::steady_clock::now();
+            totalDiff = int(std::chrono::duration_cast <std::chrono::milliseconds>(currentTime - startTime).count());
+
+            if(totalDiff > endOfSong)//End of song
+            //if (nextNoteToPlay == song.size())
+            {
+                isThreadOver = true;
+                worker.join();
+                SongNotDone = false;
+            }
+            else
+            {
+                auto newCheckTime = chrono::steady_clock::now();
+
+                int diffSinceBeginning = int(std::chrono::duration_cast <std::chrono::milliseconds>(newCheckTime - startTime).count());
+
+                //CHECK NOTES INPUT
+                if (nextNoteToPlay < song.size())
                 {
-                    //cout << " REUSSI A " << diffSinceBeginning << endl;
-                    //nbNotesCorrect++;
-                    bool* notes = song[nextNoteToPlay].getNotes();
-                    for (int i = 0; i < 5; i++)
-                    {
-                        if (notes[i])
-                        {
-                            points += 100 * powerupModifier;
-                        }
-                    }
-                    nextNoteToPlay++;
-                    NotesCorrectStreak++;
-                    lastCorrectHoldTime = diffSinceBeginning;
-                    hasLetGoHold = false;
-                }
-            }
-            else if (nextNoteStart < diffSinceBeginning && nextNoteToPlay < song.size())
-            {
-                nextNoteToPlay++;
-                NotesCorrectStreak = 0;
-                StreakWhenLastSend = 0;
-                //Enlever des points ????
-            }
+                    int nextNoteStart = song[nextNoteToPlay].getStart();
 
-            //Gestion des longues notes
-            int previousNoteEnd = 0;
-            if (nextNoteToPlay > 0)
-            {
-                previousNoteEnd = song[nextNoteToPlay - 1].getEnd();
-            }
-            if (previousNoteEnd > 0 && previousNoteEnd > diffSinceBeginning)
-            {
-                if (!hasLetGoHold)
-                {
-                    bool isHeldNotePlayedCorrectly = ComparePlayedNotes(song[nextNoteToPlay - 1], false);
-                    if (isHeldNotePlayedCorrectly)
+                    if (abs(nextNoteStart - diffSinceBeginning) < 25 && nextNoteToPlay < song.size())
                     {
-                        if (lastCorrectHoldTime >= song[nextNoteToPlay - 1].getStart())
+                        bool isNotePlayedCorrectly = ComparePlayedNotes(song[nextNoteToPlay], true); //TODO. DEVRA ETRE A TRUE
+                        if (isNotePlayedCorrectly)
                         {
-                            bool* notes = song[nextNoteToPlay - 1].getNotes();
-                            int nbHeldNotes = 0;
-                            for (int i = 0; i < 5; i++)
+                            bool isStrummed = CompareStrums();
+                            if (isStrummed)
                             {
-                                if (notes[i])
+                                //cout << " REUSSI A " << diffSinceBeginning << endl;
+                                NbNotesReussies++;
+                                bool* notes = song[nextNoteToPlay].getNotes();
+                                for (int i = 0; i < 5; i++)
                                 {
-                                    nbHeldNotes++;
+                                    if (notes[i])
+                                    {
+                                        points += 100 * powerupModifier;
+                                    }
                                 }
+                                nextNoteToPlay++;
+                                NotesCorrectStreak++;
+                                isPreviousNoteReussie = true;
+                                lastCorrectHoldTime = diffSinceBeginning;
+                                hasLetGoHold = false;
                             }
-                            points += ((diffSinceBeginning - lastCorrectHoldTime) * nbHeldNotes) * powerupModifier;
                         }
-                        lastCorrectHoldTime = diffSinceBeginning;
                     }
                     else
                     {
-                        hasLetGoHold = true;
+                        bool isStrumming = CompareStrums();
+                        if (isStrumming)
+                        {
+                            NotesCorrectStreak = 0;
+                            StreakWhenLastSend = 0;
+                            points -= 10;
+                        }
+                        if (nextNoteStart < diffSinceBeginning && nextNoteToPlay < song.size())
+                        {
+                            nextNoteToPlay++;
+                            NotesCorrectStreak = 0;
+                            StreakWhenLastSend = 0;
+                            isPreviousNoteReussie = false;
+                        }
                     }
                 }
-            }
 
-            if (!IsInPowerup && IsShaking && LedState == 10)
-            {
-                IsInPowerup = true;
-                powerupStartTime = diffSinceBeginning;
-                powerupModifier = 2;
-            }
-            if (IsInPowerup && diffSinceBeginning - powerupStartTime > POWERUP_LENGTH)
-            {
-                IsInPowerup = false;
-                BargraphNeedReset = true;
-                powerupModifier = 1;
-            }
-
-            //Gestion affichage
-            if(diffSinceBeginning % FRAMERATE == 0)
-            {
-                //system("cls");
-                displayString.clear();
-                lastPrintTime = newCheckTime;
-                if (nextRenderNoteIndex > 0)
+                //Gestion des longues notes
+                int previousNoteEnd = 0;
+                if (nextNoteToPlay > 0)
                 {
-                    int previousNoteRenderStart = song[nextRenderNoteIndex -1].getRenderStart();
-                    int previousNoteEnd = song[nextRenderNoteIndex - 1].getEnd();
-                    int previousNoteLength;
-                    if (previousNoteEnd == 0)
+                    previousNoteEnd = song[nextNoteToPlay - 1].getEnd();
+                }
+                if (previousNoteEnd > 0 && previousNoteEnd > diffSinceBeginning)
+                {
+                    if (!hasLetGoHold && isPreviousNoteReussie)
                     {
-                        previousNoteLength = 0;
-                    }
-                    else
-                    {
-                        previousNoteLength = previousNoteEnd - song[nextRenderNoteIndex - 1].getStart();
-                    }
-                    if ((diffSinceBeginning - previousNoteRenderStart) < previousNoteLength)
-                    {
-                        bool* notes = song[nextRenderNoteIndex - 1].getNotes();
-                        for (int j = 0; j < 5; j++)
+                        bool isHeldNotePlayedCorrectly = ComparePlayedNotes(song[nextNoteToPlay - 1], false);
+                        if (isHeldNotePlayedCorrectly)
                         {
-                            if (notes[j])
+                            if (lastCorrectHoldTime >= song[nextNoteToPlay - 1].getStart())
                             {
-                                displayArray[0][j] = "|";
+                                bool* notes = song[nextNoteToPlay - 1].getNotes();
+                                int nbHeldNotes = 0;
+                                for (int i = 0; i < 5; i++)
+                                {
+                                    if (notes[i])
+                                    {
+                                        nbHeldNotes++;
+                                    }
+                                }
+                                points += ((diffSinceBeginning - lastCorrectHoldTime) * nbHeldNotes) * powerupModifier;
                             }
-                        }
-                    }
-                }
-
-                if (abs(song[nextRenderNoteIndex].getRenderStart() - diffSinceBeginning) < 25)
-                {
-                    bool* notes = song[nextRenderNoteIndex].getNotes();
-                    for (int j = 0; j < 5; j++)
-                    {
-                        if (notes[j])
-                        {
-                            displayArray[0][j] = "X";
-                        }
-                    }
-                    nextRenderNoteIndex++;
-                }
-
-                //printing
-                for (int i = 0; i < NB_SQUARES + 1; i++)
-                {
-                    for (int j = 0; j < 5; j++)
-                    {
-                        if (i == NB_SQUARES - 1)
-                        {
-                            displayString += "|_" + displayArray[i][j] + "_";
+                            lastCorrectHoldTime = diffSinceBeginning;
                         }
                         else
                         {
-                            displayString += "| " + displayArray[i][j] + " ";
+                            hasLetGoHold = true;
                         }
                     }
-                    displayString += "|\n";
                 }
 
-
-                //Reordering
-                int reorderingIndex = NB_SQUARES;
-                while (reorderingIndex > 0)
+                if (!IsInPowerup && IsShaking && LedState == 10)
                 {
-                    string temp[5];
-                    for (int i = 0; i < 5; i++)
+                    IsInPowerup = true;
+                    powerupStartTime = diffSinceBeginning;
+                    powerupModifier = 2;
+                }
+                if (IsInPowerup && diffSinceBeginning - powerupStartTime > POWERUP_LENGTH)
+                {
+                    IsInPowerup = false;
+                    BargraphNeedReset = true;
+                    powerupModifier = 1;
+                }
+
+                /*cout << "StrumUp : " << StrumUp << " --- ";
+                cout << "StrumDn : " << StrumDown << endl;*/
+
+                //Gestion affichage
+                if (diffSinceBeginning % FRAMERATE == 0)
+                {
+                    //system("cls");
+                    displayString.clear();
+                    lastPrintTime = newCheckTime;
+                    if (nextRenderNoteIndex > 0)
                     {
-                        temp[i] = displayArray[reorderingIndex - 1][i];
+                        int previousNoteRenderStart = song[nextRenderNoteIndex - 1].getRenderStart();
+                        int previousNoteEnd = song[nextRenderNoteIndex - 1].getEnd();
+                        int previousNoteLength;
+                        if (previousNoteEnd == 0)
+                        {
+                            previousNoteLength = 0;
+                        }
+                        else
+                        {
+                            previousNoteLength = previousNoteEnd - song[nextRenderNoteIndex - 1].getStart();
+                        }
+                        if ((diffSinceBeginning - previousNoteRenderStart) < previousNoteLength)
+                        {
+                            bool* notes = song[nextRenderNoteIndex - 1].getNotes();
+                            for (int j = 0; j < 5; j++)
+                            {
+                                if (notes[j])
+                                {
+                                    displayArray[0][j] = "|";
+                                }
+                            }
+                        }
                     }
-                    for (int i = 0; i < 5; i++)
+
+                    if (nextRenderNoteIndex < song.size())
                     {
-                        displayArray[reorderingIndex ][i] = temp[i];
+                        if (abs(song[nextRenderNoteIndex].getRenderStart() - diffSinceBeginning) < 25)
+                        {
+                            bool* notes = song[nextRenderNoteIndex].getNotes();
+                            for (int j = 0; j < 5; j++)
+                            {
+                                if (notes[j])
+                                {
+                                    displayArray[0][j] = "X";
+                                }
+                            }
+                            nextRenderNoteIndex++;
+                        }
+                        else if (song[nextRenderNoteIndex].getRenderStart() < diffSinceBeginning && nextRenderNoteIndex < song.size())
+                        {
+                            nextRenderNoteIndex++;
+                        }
                     }
-                    reorderingIndex--;
-                }
-                displayArray[0][0] = " ";
-                displayArray[0][1] = " ";
-                displayArray[0][2] = " ";
-                displayArray[0][3] = " ";
-                displayArray[0][4] = " ";
 
-                displayString += "\n";
-                string timestampString = to_string(diffSinceBeginning);
-                string ledStateString = to_string(LedState);
-                string streakString = to_string(NotesCorrectStreak);
-                string holdTimeString = to_string(points);
-                string powerupModifierString = to_string(powerupModifier);
-                displayString += "Timestamp " + timestampString.substr(0, timestampString.find(".")) + " ms\n";
-                displayString += "Nb LEDs : " + ledStateString.substr(0, ledStateString.find(".")) + "/10\n";
-                displayString += "Nb notes de suite : " + streakString.substr(0, streakString.find(".")) + "\n";
-                displayString += "Points : " + holdTimeString.substr(0, holdTimeString.find(".")) + "\n";
-                if (IsInPowerup)
-                {
-                    displayString += "Multiplicateur : x" + powerupModifierString.substr(0, powerupModifierString.find(".")) + " --- POWERUP !!!!!\n";
-                }
-                else
-                {
-                    displayString += "Multiplicateur : x" + powerupModifierString.substr(0, powerupModifierString.find(".")) + "\n";
-                }
+                    //printing
+                    for (int i = 0; i < NB_SQUARES + 1; i++)
+                    {
+                        for (int j = 0; j < 5; j++)
+                        {
+                            if (i == NB_SQUARES - 1)
+                            {
+                                displayString += "|_" + displayArray[i][j] + "_";
+                            }
+                            else
+                            {
+                                displayString += "| " + displayArray[i][j] + " ";
+                            }
+                        }
+                        displayString += "|\n";
+                    }
 
-                string IsShakingString = to_string(IsShaking);
-                displayString += "IsShaking : " + IsShakingString.substr(0, IsShakingString.find(".")) + "\n";
 
-                cout << displayString;
+                    //Reordering
+                    int reorderingIndex = NB_SQUARES;
+                    while (reorderingIndex > 0)
+                    {
+                        string temp[5];
+                        for (int i = 0; i < 5; i++)
+                        {
+                            temp[i] = displayArray[reorderingIndex - 1][i];
+                        }
+                        for (int i = 0; i < 5; i++)
+                        {
+                            displayArray[reorderingIndex][i] = temp[i];
+                        }
+                        reorderingIndex--;
+                    }
+                    displayArray[0][0] = " ";
+                    displayArray[0][1] = " ";
+                    displayArray[0][2] = " ";
+                    displayArray[0][3] = " ";
+                    displayArray[0][4] = " ";
+
+                    displayString += "\n";
+                    string timestampString = to_string(diffSinceBeginning);
+                    string ledStateString = to_string(LedState);
+                    string streakString = to_string(NotesCorrectStreak);
+                    string holdTimeString = to_string(points);
+                    string powerupModifierString = to_string(powerupModifier);
+                    displayString += "Timestamp " + timestampString.substr(0, timestampString.find(".")) + " ms\n";
+                    displayString += "Nb LEDs : " + ledStateString.substr(0, ledStateString.find(".")) + "/10\n";
+                    displayString += "Nb notes de suite : " + streakString.substr(0, streakString.find(".")) + "\n";
+                    displayString += "Points : " + holdTimeString.substr(0, holdTimeString.find(".")) + "\n";
+                    if (IsInPowerup)
+                    {
+                        displayString += "Multiplicateur : x" + powerupModifierString.substr(0, powerupModifierString.find(".")) + " --- POWERUP !!!!!\n";
+                    }
+                    else
+                    {
+                        displayString += "Multiplicateur : x" + powerupModifierString.substr(0, powerupModifierString.find(".")) + "\n";
+                    }
+
+                    string IsShakingString = to_string(IsShaking);
+                    displayString += "IsShaking : " + IsShakingString.substr(0, IsShakingString.find(".")) + "\n";
+
+                    cout << displayString;
+                }
             }
         }
     }
@@ -487,56 +506,51 @@ int main()
              Fret3 = json_recu[FRET3];
              Fret4 = json_recu[FRET4];
              Fret5 = json_recu[FRET5];
-             StrumUp = json_recu[STRUM_UP];
-             StrumDown = json_recu[STRUM_DN];
+             /*StrumUp = json_recu[STRUM_UP];
+             StrumDown = json_recu[STRUM_DN];*/
+
+             int tempStrumUP = json_recu[STRUM_UP];
+             if (tempStrumUP == 1)
+             {
+                 if (consecutiveStrumUP > 0)
+                 {
+                     StrumUp = 0;
+                 }
+                 else {
+                     StrumUp = 1;
+                     consecutiveStrumUP++;
+                     isSameStrumUP = false;
+                 }
+             }
+             else{
+                 StrumUp = 0;
+                 consecutiveStrumUP = 0;
+             }
+
+             int tempStrumDown = json_recu[STRUM_DN];
+             if (tempStrumDown == 1)
+             {
+                 if (consecutiveStrumDN > 0)
+                 {
+                     StrumDown = 0;
+                 }
+                 else {
+                     StrumDown = 1;
+                     consecutiveStrumDN++;
+                     isSameStrumDN = false;
+                 }
+             }
+             else {
+                 StrumDown = 0;
+                 consecutiveStrumDN = 0;
+             }
+
              JoyDir = json_recu[JOY_DIR];
              IsShaking = json_recu[ACCEL];
 
-             if (IsShaking)
+             /*if (IsShaking)
              {
                  cout << "SENSIBILITE BEN TROP BASSE" << endl;
-             }
-
-             /*if(led_state == 10) //lorsque la dixieme led est allumee
-             {
-                 start = std::chrono::steady_clock::now(); // debute le chrono
-             }
-
-             if(Fret1 != 0) //verifie la valeur de fret1
-             {
-                 now = std::chrono::steady_clock::now();
-
-                 double elapsed_time_ms = double(std::chrono::duration_cast <std::chrono::milliseconds> (now - start).count());
-                 std::cout << "Temps ecouleyy : " << elapsed_time_ms/1e3 << " secondes" << std::endl;
-             }*/
-             /*if (JoyDir == 4)
-             {
-                 led_state += 1;
-             }
-
-             if (JoyDir == 3)
-             {
-                 led_state -= 1;
-             }
-
-             if (JoyDir == 2)
-             {
-                 led_state = 0;
-             }
-
-             if (JoyDir == 1)
-             {
-                 led_state = 10;
-             }
-
-             if (led_state > 10)
-             {
-                 led_state = 0;
-             }
-
-             if (led_state < 0)
-             {
-                 led_state = 10;
              }*/
          }
          Sleep(1);
@@ -556,20 +570,69 @@ int main()
 
      if (comp1 && comp2 && comp3 && comp4 && comp5)
      {
-         if (strumNeeded)
+         correctlyPlayed = true;
+         /*if (strumNeeded)
          {
              bool compDown = CompareIndividualButton(true, StrumDown);
-             bool compUp = CompareIndividualButton(true, StrumUp);
-
-             if (compDown || compUp)
+             if (isSameStrumDN && compDown)
              {
-                 correctlyPlayed = true;
+                 compDown = false;
              }
-         }
-         correctlyPlayed = true;
+             else {
+                 isSameStrumDN = true;
+             }
+             bool compUp = CompareIndividualButton(true, StrumUp);
+             if (isSameStrumUP && compDown)
+             {
+                 compUp = false;
+             }
+             else {
+                 isSameStrumUP = true;
+             }
+
+             if (!compDown && !compUp)
+             {
+                 correctlyPlayed = false;
+             }
+         }*/
      }
 
      return correctlyPlayed;
+ }
+
+ bool CompareStrums()
+ {
+     bool correctlyPlayed = false;
+
+     bool compDn = StrumDown;
+     if (isSameStrumDN)
+     {
+         compDn = false;
+     }
+     else {
+         if (compDn)
+         {
+             isSameStrumDN = true;
+         }
+     }
+
+    bool compUp = StrumUp;
+    if (isSameStrumUP)
+    {
+        compUp = false;
+    }
+    else {
+        if (compUp)
+        {
+            isSameStrumUP = true;
+        }
+    }
+
+    if (compDn || compUp)
+    {
+        correctlyPlayed = true;
+    }
+    return correctlyPlayed;
  }
 
  bool CompareIndividualButton(bool wantedValue, int buttonState)
@@ -608,3 +671,216 @@ int main()
      return LedState;
  }
 
+ //bool MenuInitialisation(int& numeroChanson, int& niveauDifficulte, vector<Song> repo) {
+ //    //display du Menu
+ //    int repo_size = repo.size();
+ //    int choix = displayMenu();
+ //    switch (choix)
+ //    {
+ //    case 1:
+ //        //choisir chanson
+ //        system("CLS");
+ //        cout << "----------------------------------------------------------------------" << endl;
+ //        cout << "\t\t\tMENU CHOIX DE CHANSON" << endl;
+ //        cout << "----------------------------------------------------------------------\n" << endl;
+ //        cout << " On devra faire un display des chansons disponibles...\n";
+ //        /*
+ //        for (int i = 0; i < repertoire.size; i++){
+ //            cout << i+1 << ". " << repertoire[i].song.getTitle() << endl;
+ //        }
+ //        */
+ //        for (int i = 0; i < repo_size + 1; i++) {
+ //            if (i == repo.size())
+ //            {
+ //                cout << i + 1 << ". Retour" << endl;
+ //            }
+ //            else {
+ //                cout << i + 1 << ". " << repo[i].getTitle() << endl << " par " << repo[i].getArtist() << endl;
+ //            }
+ //        }
+ //        cout << "\nChoisissez une chanson : ";
+ //        cin >> numeroChanson;
+ //        while (numeroChanson <  1 || numeroChanson > repo.size() + 1) {
+ //            cout << "Entree non valide. Veuillez entrer un numero de chanson valide" << endl;
+ //            cin >> numeroChanson;
+ //        }
+ //        if (numeroChanson == repo.size())
+ //        {
+ //            MenuInitialisation(numeroChanson, niveauDifficulte, repo); //retourne au display du menu
+ //        }
+ //        numeroChanson -= 1;
+
+ //        //choisir niveau de difficulté
+ //        system("CLS");
+ //        cout << "----------------------------------------------------------------------" << endl;
+ //        cout << "\t\t\tMENU NIVEAU DE DIFFICULTE" << endl;
+ //        cout << "----------------------------------------------------------------------\n" << endl;
+
+ //        cout << "1. Easy" << endl;
+ //        cout << "2. Medium" << endl;
+ //        cout << "3. Hard" << endl;
+ //        cout << "4. Expert" << endl;
+
+ //        cout << "\nChoisissez le niveau de difficulte : ";
+ //        cin >> niveauDifficulte;
+ //        while (niveauDifficulte < 0 || niveauDifficulte > 4) {
+ //            cout << "Entree non valide. Veuillez entrer un niveau de difficulte valide" << endl;
+ //            cin >> niveauDifficulte;
+ //        }
+ //        MenuInitialisation(numeroChanson, niveauDifficulte, repo); //retourne au display du menu
+ //        niveauDifficulte = -1;
+ //        return true;
+ //        break;
+ //    //case 3:
+ //    //    system("CLS");
+ //    //    cout << "Le jeu va debuter...!!\n" << endl;
+ //    //    if (*numeroChanson < 1 || *numeroChanson > 4 || *niveauDifficulte < 1 || *niveauDifficulte > 4) {
+ //    //        //chanson et difficulte par defaut 
+ //    //        *numeroChanson = 1;
+ //    //        *niveauDifficulte = 1;
+ //    //    }
+ //    //    cout << "Chanson choisie : " << listeChansons[*numeroChanson - 1] << endl;
+ //    //    cout << "Niveau de difficulte : " << listeDifficultes[*niveauDifficulte - 1] << "\n\n";
+ //    //    return true; //debuter le jeu
+ //    //    break;
+
+ //    case 2:
+ //        system("CLS");
+ //        cout << "A bientot, KEEP ON ROCKING!!" << endl;
+ //        return false; //quitter le jeu
+ //        break;
+
+ //    default:
+ //        break;
+ //    }
+ //}
+
+ bool MenuInitialisation(int& numeroChanson, int& niveauDifficulte, vector<Song> repo) {
+     //display du Menu
+     int repo_size = repo.size();
+     int choix = 0;
+     bool madeADecision = false;
+     bool retour = false;
+     bool wantToReturn = false;
+
+     while (!madeADecision)
+     {
+         choix = displayMenu();
+         switch (choix)
+         {
+         case 1:
+             wantToReturn = false;
+             //choisir chanson
+             system("CLS");
+             cout << "----------------------------------------------------------------------" << endl;
+             cout << "\t\t\tMENU CHOIX DE CHANSON" << endl;
+             cout << "----------------------------------------------------------------------\n" << endl;
+             cout << " On devra faire un display des chansons disponibles...\n";
+             /*
+             for (int i = 0; i < repertoire.size; i++){
+                 cout << i+1 << ". " << repertoire[i].song.getTitle() << endl;
+             }
+             */
+             for (int i = 0; i < repo_size + 1; i++) {
+                 if (i == repo.size())
+                 {
+                     cout << i + 1 << ". Retour" << endl;
+                 }
+                 else {
+                     cout << i + 1 << ". " << repo[i].getTitle() << " par " << repo[i].getArtist() << endl;
+                 }
+             }
+             cout << "\nChoisissez une chanson : ";
+             cin >> numeroChanson;
+             while (numeroChanson <  1 || numeroChanson > repo.size() + 1) {
+                 cout << "Entree non valide. Veuillez entrer un numero de chanson valide" << endl;
+                 cin >> numeroChanson;
+             }
+             numeroChanson -= 1;
+             if (numeroChanson == repo.size())
+             {
+                 wantToReturn = true;
+             }
+
+
+             if (!wantToReturn)
+             {
+                 //choisir niveau de difficulté
+                 system("CLS");
+                 cout << "----------------------------------------------------------------------" << endl;
+                 cout << "\t\t\tMENU NIVEAU DE DIFFICULTE" << endl;
+                 cout << "----------------------------------------------------------------------\n" << endl;
+
+                 cout << "1. Easy" << endl;
+                 cout << "2. Medium" << endl;
+                 cout << "3. Hard" << endl;
+                 cout << "4. Expert" << endl;
+                 cout << "5. Retour" << endl;
+
+                 cout << "\nChoisissez le niveau de difficulte : ";
+                 cin >> niveauDifficulte;
+                 while (niveauDifficulte < 0 || niveauDifficulte > 5) {
+                     cout << "Entree non valide. Veuillez entrer un niveau de difficulte valide" << endl;
+                     cin >> niveauDifficulte;
+                 }
+
+                 if (niveauDifficulte == 5)
+                 {
+                     wantToReturn = true;
+                 }
+                 
+                 niveauDifficulte -= 1;
+                 //case 3:
+                 //    system("CLS");
+                 //    cout << "Le jeu va debuter...!!\n" << endl;
+                 //    if (*numeroChanson < 1 || *numeroChanson > 4 || *niveauDifficulte < 1 || *niveauDifficulte > 4) {
+                 //        //chanson et difficulte par defaut 
+                 //        *numeroChanson = 1;
+                 //        *niveauDifficulte = 1;
+                 //    }
+                 //    cout << "Chanson choisie : " << listeChansons[*numeroChanson - 1] << endl;
+                 //    cout << "Niveau de difficulte : " << listeDifficultes[*niveauDifficulte - 1] << "\n\n";
+                 //    return true; //debuter le jeu
+                 //    break;
+             }
+
+             if (!wantToReturn)
+             {
+                 madeADecision = true;
+                 retour = true;
+             }
+             
+             break;
+
+         case 2:
+             system("CLS");
+             cout << "A bientot, KEEP ON ROCKING!!" << endl;
+             madeADecision = true;
+             retour = false; //quitter le jeu
+             break;
+
+         default:
+             break;
+         }
+     }
+     return retour;
+ }
+
+ //Fonction qui presente la premiere section du menu
+ int displayMenu() {
+     system("CLS");
+     int choix;
+     cout << "----------------------------------------------------------------------" << endl;
+     cout << "\t\tMENU GUITAR HERO DEVELISH RELLISH" << endl;
+     cout << "----------------------------------------------------------------------\n" << endl;
+     cout << "   1. Debuter le jeu " << endl;
+     //cout << "   2. Informations " << endl;
+     cout << "   2. Quitter le jeu \n" << endl;
+     cout << "Choisissez une option : ";
+     cin >> choix;
+     while (choix < 1 || choix > 3) {
+         cout << "Choix non valide. Veuillez choisir une option valide" << endl;
+         cin >> choix;
+     }
+     return choix;
+ }

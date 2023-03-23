@@ -10,7 +10,7 @@
 
 Song::Song(std::string chartFile): chartFile(chartFile){
   // substitute "notes.chart" for "song.wav"
-  string audioFile = chartFile;
+  std::string audioFile = chartFile;
   audioFile.replace(audioFile.find("notes.chart"), 12, "song.wav");
   parseInfo();
   parseSync();
@@ -166,19 +166,19 @@ bool Song::parseChords(int difficulty){
   switch (difficulty){
     case DIFFICULTY_EASY:
       stringPattern = "EasySingle";
-      std::vector<ChordNote>*chords = &easy;
+      chords = &easy;
       break;
     case DIFFICULTY_MEDIUM:
       stringPattern = "MediumSingle";
-      std::vector<ChordNote>*chords = &medium;
+     chords = &medium;
       break;
     case DIFFICULTY_HARD:
       stringPattern = "HardSingle";
-      std::vector<ChordNote>*chords = &hard;
+      chords = &hard;
       break;
     case DIFFICULTY_EXPERT:
       stringPattern = "ExpertSingle";
-      std::vector<ChordNote>*chords = &expert;
+      chords = &expert;
       break;
     default:
       std::cerr << "Invalid difficulty" << std::endl;
@@ -277,16 +277,16 @@ void Song::consolidateChords(int difficulty){
   std::vector<ChordNote>*chords;
   switch (difficulty){
     case DIFFICULTY_EASY:
-      std::vector<ChordNote>*chords = &easy;
+      chords = &easy;
       break;
     case DIFFICULTY_MEDIUM:
-      std::vector<ChordNote>*chords = &medium;
+      chords = &medium;
       break;
     case DIFFICULTY_HARD:
-      std::vector<ChordNote>*chords = &hard;
+      chords = &hard;
       break;
     case DIFFICULTY_EXPERT:
-      std::vector<ChordNote>*chords = &expert;
+      chords = &expert;
       break;
     default:
       std::cerr << "Invalid difficulty" << std::endl;
@@ -374,9 +374,28 @@ std::string Song::getAudioFile(){
 void Song::trim(int difficulty){
   // TODO: make this fuction use the difficulty parameter
   //std::vector<ChordNote> *chords = &expert;
-  for (int i = 0; i < expert.size(); i++)
+  std::vector<ChordNote>* chords;
+  switch (difficulty) {
+  case DIFFICULTY_EASY:
+      chords = &easy;
+      break;
+  case DIFFICULTY_MEDIUM:
+      chords = &medium;
+      break;
+  case DIFFICULTY_HARD:
+      chords = &hard;
+      break;
+  case DIFFICULTY_EXPERT:
+      chords = &expert;
+      break;
+  default:
+      std::cerr << "Invalid difficulty" << std::endl;
+      return;
+  }
+
+  for (int i = 0; i < chords->size(); i++)
   {
-      expert[i].trim();
+      chords->at(i).trim();
   }
 }
 
