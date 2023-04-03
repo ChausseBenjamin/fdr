@@ -71,16 +71,16 @@ int main()
 {
     vector<Song> repertoire;    //Liste des chansons disponibles:
     vector<string> songFolders; //Liste des dossiers chansons disponibles:
-    /*songFolders.push_back("\\Maynard-Ferguson-Birdland\\");
-    songFolders.push_back("\\Maynard-Ferguson-Country-Road-(James-Taylor-Cover)\\");
-    songFolders.push_back("\\Maynard-Ferguson-Theme-From-Shaft\\");
-    songFolders.push_back("\\Owane-Rock-Is-Too-Heavy\\");
-    songFolders.push_back("\\Stevie-Wonder-Contusion\\");
-    songFolders.push_back("\\Victor-Wooten-and-Steve-Bailey-A-Chick-from-Corea-(Live)\\");*/
+    songFolders.push_back("\\Maynard-Ferguson-Birdland\\");
     songFolders.push_back("\\Greta-Van-Fleet-Highway-Tune\\");
     songFolders.push_back("\\Joan-Jett-and-the-Blackhearts-I-Love-Rock-_N-Roll-(The-Arrows-Cover)\\");
     songFolders.push_back("\\Santana-Oye-Como-Va-(Tito-Puente-Cover)\\");
     songFolders.push_back("\\Symphony-X-Eve-of-Seduction\\");
+    //songFolders.push_back("\\Maynard-Ferguson-Country-Road-(James-Taylor-Cover)\\");
+    //songFolders.push_back("\\Maynard-Ferguson-Theme-From-Shaft\\");
+    //songFolders.push_back("\\Owane-Rock-Is-Too-Heavy\\");
+    //songFolders.push_back("\\Stevie-Wonder-Contusion\\");
+    //songFolders.push_back("\\Victor-Wooten-and-Steve-Bailey-A-Chick-from-Corea-(Live)\\");
 
     string songRoot = "..\\songs";
     string chartFile = "notes.chart";
@@ -716,7 +716,7 @@ int GetLedState()
 //        }
 //        numeroChanson -= 1;
 
-//        //choisir niveau de difficulté
+//        //choisir niveau de difficultï¿½
 //        system("CLS");
 //        cout << "----------------------------------------------------------------------" << endl;
 //        cout << "\t\t\tMENU NIVEAU DE DIFFICULTE" << endl;
@@ -811,7 +811,7 @@ bool MenuInitialisation(int& numeroChanson, int& niveauDifficulte, vector<Song> 
 
             if (!wantToReturn)
             {
-                //choisir niveau de difficulté
+                //choisir niveau de difficultï¿½
                 system("CLS");
                 cout << "----------------------------------------------------------------------" << endl;
                 cout << "\t\t\tMENU NIVEAU DE DIFFICULTE" << endl;
@@ -890,4 +890,3 @@ int displayMenu() {
     }
     return choix;
 }
-
