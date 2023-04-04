@@ -99,6 +99,7 @@ int countSD = 0;
 int countSU = 0;
 bool sendSD = false;
 bool sendSU = false;
+int Muons = 0;
 
 int del = 100;
 //double count = 0;
@@ -189,6 +190,8 @@ void loop()
   Joystick();
   ledstate();
   shaking();
+  Muons = rand() % 100;
+
 
   debouncing(Button0, readPinSD, outputBoutonSD);
   debouncing(Button1, readPinSU, outputBoutonSU);
@@ -649,6 +652,8 @@ void sendMsg() {
   //dataset.add(analogRead(readPinAccY));
   //dataset.add(analogRead(readPinAccZ));
   dataset.add((int)isShaking);
+  dataset.add((int)Muons);
+
   //dataset.add(sendSD);
   //dataset.add(countSD);
 
