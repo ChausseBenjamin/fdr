@@ -15,6 +15,7 @@
 
 #define BAUD 115200        // Frequence de transmission serielle
 #define delayTime 1000
+#define JOY_FREEZE 50
 
 /*---------------------------- Variables globales ---------------------------*/
 
@@ -22,7 +23,7 @@ volatile bool shouldSend_ = false;  // Drapeau prêt à envoyer un message
 volatile bool shouldRead_ = false;  // Drapeau prêt à lire un message
 
 unsigned long lastDebounceTime = 0;
-unsigned long debounceDelay = 50;
+unsigned long debounceDelay = 20;
 
 int buttonState1;
 int buttonState2;
@@ -57,6 +58,7 @@ int readPinPotY = A8;
 int readPinAccX = A15;
 int readPinAccY = A14;
 int readPinAccZ = A13;
+int last3AccZ[3] = {300, 300, 300};
 
 
 int OutPinLed10 = 53;
@@ -88,7 +90,9 @@ int LastAccY = 0;
 int LastAccZ = 0;
 
 int JoyDir = 0;
+int count = 0;
 int JoyDirOut = 0;
+int lastJoy = 0;
 int ledAllumee = 0;
 int test;
 int countSD = 0;
@@ -120,6 +124,7 @@ void Joystick();
 void ledstate();
 void debouncing(int i, int &pin, bool &out);
 void shaking();
+int moyenneACC();
 /*---------------------------- Fonctions "Main" -----------------------------*/
 
 void setup() {
@@ -250,8 +255,13 @@ void shaking()
   AccX = analogRead(readPinAccX);
   AccY = analogRead(readPinAccY);
   AccZ = analogRead(readPinAccZ);
-  int temp;
-  int Max = 50;
+  
+  last3AccZ[2] = last3AccZ[1];
+  last3AccZ[1] = last3AccZ[0];
+  last3AccZ[0] = AccZ;
+
+  //int temp;
+  //int Max = 50;
 
   /*temp = AccX-LastAccX;
   if(temp < 0)
@@ -283,7 +293,8 @@ void shaking()
     isShaking = true;
   }*/
   
-  if(AccZ > 350 || AccZ < 250)
+  int moyenne = moyenneACC();
+  if(moyenne > 350 || moyenne < 250)
   {
     isShaking = true;
   }
@@ -482,42 +493,136 @@ void ledstate(){
 /*---------------------------Definition de fonctions ------------------------*/
 
 void Joystick(){
+  
+  // code pour alternance des envois pour visualiser
+  /*
+  if(count <= 30) //renvoie directement la position lue pour les 100 premiers messages
+  { 
+    lastJoy = 0; //remettre lastJoy a 0, c'est un passe-droit pour renvoyer directement la position lue
+    count++;
+  }
+  else if(count <= 300) //ne renvoie plus directement la valeur lue pour un certain nombre de messages
+  {
+    count++;
+  }
+  else
+  {
+    count = 0;
+  }
+  */
+
+ 
+  JoyDir = 0;
+
+
   if(VPotX < 600 && VPotX > 350)
   {
     if(VPotY < 600 && VPotY > 350)
     {
-      JoyDir = 0;
+      lastJoy = JoyDir;
     } 
   }
-  if(VPotX < 350)
+
+
+ if(VPotX < 350)
   {
     if(VPotY < 600 && VPotY > 350)
     {
-      JoyDir = 1;
+      if (lastJoy == 0)
+      {
+        JoyDir = 1;
+        count = 0;
+        lastJoy = JoyDir;
+      }
+      else
+      {
+        count++;
+        if (count > JOY_FREEZE)
+        {
+          JoyDir = 1;
+          count = 0;
+          lastJoy = JoyDir;
+        }
+      }
     }
+    
+    
   }
   if(VPotX > 600)
   {
     if(VPotY < 600 && VPotY > 350)
     {
-      JoyDir = 2;
+      if (lastJoy == 0)
+      {
+        JoyDir = 2;
+        count = 0;
+        lastJoy = JoyDir;
+      }
+      else
+      {
+        count++;
+        if (count > JOY_FREEZE)
+        {
+          JoyDir = 2;
+          count = 0;
+          lastJoy = JoyDir;
+        } 
+      }
     }
+
+    
   }
   if(VPotX < 600 && VPotX > 350)
   {
     if(VPotY < 350)
     {
-      JoyDir = 3;
+      if (lastJoy == 0)
+      {
+        JoyDir = 3;
+        count = 0;
+        lastJoy = JoyDir;
+      }
+      else
+      {
+        count++;
+        if (count > JOY_FREEZE)
+        {
+          JoyDir = 3;
+          count = 0;
+          lastJoy = JoyDir;
+        } 
+      }
     }
+
   }
   if(VPotX < 600 && VPotX > 350)
   {
     if(VPotY > 600)
     {
-      JoyDir = 4;
+      if (lastJoy == 0)
+      {
+        JoyDir = 4;
+        count = 0;
+        lastJoy = JoyDir;
+      }
+      else
+      {
+        count++;
+        if (count > JOY_FREEZE)
+        {
+          JoyDir = 4;
+          count = 0;
+          lastJoy = JoyDir;
+        } 
+      }
     }
   }
+  return;
+
+
 }
+
+//int JoystickCorrection() //envoie une valeur differente de 0 seulement si il y a eu changement
 
 /*---------------------------Definition de fonctions ------------------------
 Fonction d'envoi
@@ -595,6 +700,11 @@ void readMsg(){
   }
 }
 
+int moyenneACC()
+{
+  int moyenne = (last3AccZ[0] + last3AccZ[1] + last3AccZ[2])/3;
+  return moyenne;  
+}
 
 /*void deboucing(int reading, int& last, int& state)
 {
