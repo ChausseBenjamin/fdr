@@ -29,6 +29,9 @@ using namespace std;
 #define JOY_DIR 7
 #define ACCEL 8
 
+#define JOY_DIR_UP 3
+#define JOY_DIR_DN 4
+
 
 
 /*------------------------- Prototypes de fonctions -------------------------*/
@@ -41,6 +44,7 @@ bool CompareStrums();
 int GetLedState();
 int displayMenu();
 bool MenuInitialisation(int& numeroChanson, int& niveauDifficulte, vector<Song> repo);
+string printSelectionCursor(int selected, int lineIndex);
 
 
 /*---------------------------- Variables globales ---------------------------*/
@@ -65,6 +69,13 @@ bool isThreadOver = false;
 int StreakWhenLastSend = 0;
 bool isSameStrumUP = true;
 bool isSameStrumDN = true;
+int lastReceivedJoyDir = 0;
+int lastReceivedFret1 = 0;
+int lastReceivedFret2 = 0;
+bool isSameEvaluatedJoyDir = false;
+bool isSameEvaluatedFret1 = false;
+bool isSameEvaluatedFret2 = false;
+bool isInMenu = false;
 
 
 int main()
@@ -74,13 +85,13 @@ int main()
     songFolders.push_back("\\Maynard-Ferguson-Birdland\\");
     songFolders.push_back("\\Greta-Van-Fleet-Highway-Tune\\");
     songFolders.push_back("\\Joan-Jett-and-the-Blackhearts-I-Love-Rock-_N-Roll-(The-Arrows-Cover)\\");
-    songFolders.push_back("\\Santana-Oye-Como-Va-(Tito-Puente-Cover)\\");
+    /*songFolders.push_back("\\Santana-Oye-Como-Va-(Tito-Puente-Cover)\\");
     songFolders.push_back("\\Symphony-X-Eve-of-Seduction\\");
-    //songFolders.push_back("\\Maynard-Ferguson-Country-Road-(James-Taylor-Cover)\\");
-    //songFolders.push_back("\\Maynard-Ferguson-Theme-From-Shaft\\");
-    //songFolders.push_back("\\Owane-Rock-Is-Too-Heavy\\");
-    //songFolders.push_back("\\Stevie-Wonder-Contusion\\");
-    //songFolders.push_back("\\Victor-Wooten-and-Steve-Bailey-A-Chick-from-Corea-(Live)\\");
+    songFolders.push_back("\\Maynard-Ferguson-Country-Road-(James-Taylor-Cover)\\");
+    songFolders.push_back("\\Maynard-Ferguson-Theme-From-Shaft\\");
+    songFolders.push_back("\\Owane-Rock-Is-Too-Heavy\\");
+    songFolders.push_back("\\Stevie-Wonder-Contusion\\");
+    songFolders.push_back("\\Victor-Wooten-and-Steve-Bailey-A-Chick-from-Corea-(Live)\\");*/
 
     string songRoot = "..\\songs";
     string chartFile = "notes.chart";
@@ -102,11 +113,21 @@ int main()
         }
     }
 
+    string com = "com7";
+    arduino = new SerialPort(com.c_str(), BAUD);
+
+    std::thread worker(RcvJsonThread);
+
+    if (!arduino->isConnected()) {
+        cerr << "Impossible de se connecter au port " << string(com.c_str()) << ". Fermeture du programme!" << endl;
+        exit(1);
+    }
+
     int songIndex;
     int difficulty;
-    bool wantToPlay = MenuInitialisation(songIndex, difficulty, repertoire);
-    if (wantToPlay)
+    while (MenuInitialisation(songIndex, difficulty, repertoire))
     {
+        isInMenu = false;
         std::vector<ChordNote> song;
         switch (difficulty)
         {
@@ -151,14 +172,6 @@ int main()
             }
         }
 
-        string com = "com7";
-        arduino = new SerialPort(com.c_str(), BAUD);
-
-        if (!arduino->isConnected()) {
-            cerr << "Impossible de se connecter au port " << string(com.c_str()) << ". Fermeture du programme!" << endl;
-            exit(1);
-        }
-
         // Structure de donnees JSON pour envoie et reception
         json j_msg_send, j_msg_rcv;
 
@@ -188,8 +201,6 @@ int main()
         }
         endOfSong += 500;
 
-        std::thread worker(RcvJsonThread);
-
         while (SongNotDone)
         {
             auto currentTime = chrono::steady_clock::now();
@@ -198,8 +209,8 @@ int main()
             if (totalDiff > endOfSong)//End of song
             //if (nextNoteToPlay == song.size())
             {
-                isThreadOver = true;
-                worker.join();
+                /*isThreadOver = true;
+                worker.join();*/
                 SongNotDone = false;
             }
             else
@@ -308,7 +319,7 @@ int main()
 
                 /*cout << "StrumUp : " << StrumUp << " --- ";
                 cout << "StrumDn : " << StrumDown << endl;*/
-
+                
                 //Gestion affichage
                 if (diffSinceBeginning % FRAMERATE == 0)
                 {
@@ -427,6 +438,10 @@ int main()
             }
         }
     }
+    isThreadOver = true;
+    worker.join();
+
+    Sleep(2500);
 
     return 0;
 }
@@ -507,8 +522,44 @@ void RcvJsonThread()
         {
             //cout << "longueur " << j_msg_rcv.size() <<"\n";
             //cout << "7 " << j_msg_rcv[7] <<"\n";
-            Fret1 = json_recu[FRET1];
-            Fret2 = json_recu[FRET2];
+            int tempFret1 = json_recu[FRET1];
+            if (isInMenu)
+            {
+                if (tempFret1 == lastReceivedFret1)
+                {
+                    Fret1 = 0;
+                }
+                else
+                {
+                    Fret1 = tempFret1;
+                    isSameEvaluatedFret1 = false;
+                }
+                lastReceivedFret1 = tempFret1;
+                isSameEvaluatedFret1 = false;
+            }
+            else {
+                Fret1 = tempFret1;
+            }
+
+            int tempFret2 = json_recu[FRET2];
+            if (isInMenu)
+            {
+                if (tempFret2 == lastReceivedFret2)
+                {
+                    Fret2 = 0;
+                }
+                else
+                {
+                    Fret2 = tempFret2;
+                    isSameEvaluatedFret2 = false;
+                }
+                lastReceivedFret2 = tempFret1;
+                isSameEvaluatedFret2 = false;
+            }
+            else {
+                Fret2 = tempFret2;
+            }
+
             Fret3 = json_recu[FRET3];
             Fret4 = json_recu[FRET4];
             Fret5 = json_recu[FRET5];
@@ -551,7 +602,17 @@ void RcvJsonThread()
                 consecutiveStrumDN = 0;
             }
 
-            JoyDir = json_recu[JOY_DIR];
+            int tempJoyDir = json_recu[JOY_DIR];
+            if (tempJoyDir == lastReceivedJoyDir)
+            {
+                JoyDir = 0;
+            }
+            else
+            {
+                JoyDir = tempJoyDir;
+                isSameEvaluatedJoyDir = false;
+            }
+            lastReceivedJoyDir = tempJoyDir;
             IsShaking = json_recu[ACCEL];
 
             /*if (IsShaking)
@@ -677,97 +738,18 @@ int GetLedState()
     return LedState;
 }
 
-//bool MenuInitialisation(int& numeroChanson, int& niveauDifficulte, vector<Song> repo) {
-//    //display du Menu
-//    int repo_size = repo.size();
-//    int choix = displayMenu();
-//    switch (choix)
-//    {
-//    case 1:
-//        //choisir chanson
-//        system("CLS");
-//        cout << "----------------------------------------------------------------------" << endl;
-//        cout << "\t\t\tMENU CHOIX DE CHANSON" << endl;
-//        cout << "----------------------------------------------------------------------\n" << endl;
-//        cout << " On devra faire un display des chansons disponibles...\n";
-//        /*
-//        for (int i = 0; i < repertoire.size; i++){
-//            cout << i+1 << ". " << repertoire[i].song.getTitle() << endl;
-//        }
-//        */
-//        for (int i = 0; i < repo_size + 1; i++) {
-//            if (i == repo.size())
-//            {
-//                cout << i + 1 << ". Retour" << endl;
-//            }
-//            else {
-//                cout << i + 1 << ". " << repo[i].getTitle() << endl << " par " << repo[i].getArtist() << endl;
-//            }
-//        }
-//        cout << "\nChoisissez une chanson : ";
-//        cin >> numeroChanson;
-//        while (numeroChanson <  1 || numeroChanson > repo.size() + 1) {
-//            cout << "Entree non valide. Veuillez entrer un numero de chanson valide" << endl;
-//            cin >> numeroChanson;
-//        }
-//        if (numeroChanson == repo.size())
-//        {
-//            MenuInitialisation(numeroChanson, niveauDifficulte, repo); //retourne au display du menu
-//        }
-//        numeroChanson -= 1;
-
-//        //choisir niveau de difficult�
-//        system("CLS");
-//        cout << "----------------------------------------------------------------------" << endl;
-//        cout << "\t\t\tMENU NIVEAU DE DIFFICULTE" << endl;
-//        cout << "----------------------------------------------------------------------\n" << endl;
-
-//        cout << "1. Easy" << endl;
-//        cout << "2. Medium" << endl;
-//        cout << "3. Hard" << endl;
-//        cout << "4. Expert" << endl;
-
-//        cout << "\nChoisissez le niveau de difficulte : ";
-//        cin >> niveauDifficulte;
-//        while (niveauDifficulte < 0 || niveauDifficulte > 4) {
-//            cout << "Entree non valide. Veuillez entrer un niveau de difficulte valide" << endl;
-//            cin >> niveauDifficulte;
-//        }
-//        MenuInitialisation(numeroChanson, niveauDifficulte, repo); //retourne au display du menu
-//        niveauDifficulte = -1;
-//        return true;
-//        break;
-//    //case 3:
-//    //    system("CLS");
-//    //    cout << "Le jeu va debuter...!!\n" << endl;
-//    //    if (*numeroChanson < 1 || *numeroChanson > 4 || *niveauDifficulte < 1 || *niveauDifficulte > 4) {
-//    //        //chanson et difficulte par defaut 
-//    //        *numeroChanson = 1;
-//    //        *niveauDifficulte = 1;
-//    //    }
-//    //    cout << "Chanson choisie : " << listeChansons[*numeroChanson - 1] << endl;
-//    //    cout << "Niveau de difficulte : " << listeDifficultes[*niveauDifficulte - 1] << "\n\n";
-//    //    return true; //debuter le jeu
-//    //    break;
-
-//    case 2:
-//        system("CLS");
-//        cout << "A bientot, KEEP ON ROCKING!!" << endl;
-//        return false; //quitter le jeu
-//        break;
-
-//    default:
-//        break;
-//    }
-//}
-
 bool MenuInitialisation(int& numeroChanson, int& niveauDifficulte, vector<Song> repo) {
     //display du Menu
+    isInMenu = true;
     int repo_size = repo.size();
     int choix = 0;
     bool madeADecision = false;
     bool retour = false;
     bool wantToReturn = false;
+    bool madeSongDecision = false;
+    bool madeDifficultyDecision = false;
+    int choixChanson = 1;
+    int choixDifficulte = 1;
 
     while (!madeADecision)
     {
@@ -775,79 +757,160 @@ bool MenuInitialisation(int& numeroChanson, int& niveauDifficulte, vector<Song> 
         switch (choix)
         {
         case 1:
+            choixChanson = 1;
             wantToReturn = false;
-            //choisir chanson
-            system("CLS");
-            cout << "----------------------------------------------------------------------" << endl;
-            cout << "\t\t\tMENU CHOIX DE CHANSON" << endl;
-            cout << "----------------------------------------------------------------------\n" << endl;
-            //cout << " On devra faire un display des chansons disponibles...\n";
-            /*
-            for (int i = 0; i < repertoire.size; i++){
-                cout << i+1 << ". " << repertoire[i].song.getTitle() << endl;
-            }
-            */
-            for (int i = 0; i < repo_size + 1; i++) {
-                if (i == repo.size())
-                {
-                    cout << i + 1 << ". Retour" << endl;
-                }
-                else {
-                    cout << i + 1 << ". " << repo[i].getTitle() << " par " << repo[i].getArtist() << endl;
-                }
-            }
-            cout << "\nChoisissez une chanson : ";
-            cin >> numeroChanson;
-            while (numeroChanson <  1 || numeroChanson > repo.size() + 1) {
-                cout << "Entree non valide. Veuillez entrer un numero de chanson valide" << endl;
-                cin >> numeroChanson;
-            }
-            numeroChanson -= 1;
-            if (numeroChanson == repo.size())
+            madeSongDecision = false;
+            while (!madeSongDecision)
             {
-                wantToReturn = true;
+                //choisir chanson
+                system("CLS");
+                cout << "----------------------------------------------------------------------" << endl;
+                cout << "\t\t\tMENU CHOIX DE CHANSON" << endl;
+                cout << "----------------------------------------------------------------------\n" << endl;
+                //cout << " On devra faire un display des chansons disponibles...\n";
+                /*
+                for (int i = 0; i < repertoire.size; i++){
+                    cout << i+1 << ". " << repertoire[i].song.getTitle() << endl;
+                }
+                */
+                for (int i = 0; i < repo_size + 1; i++) {
+                    if (i == repo_size)
+                    {
+                        cout << i + 1 << ". Retour" << printSelectionCursor(choixChanson, i+1) << endl;
+                    }
+                    else {
+                        cout << i + 1 << ". " << repo[i].getTitle() << " par " << repo[i].getArtist() << printSelectionCursor(choixChanson, i + 1) << endl;
+                    }
+                }
+                cout << "\nChoisissez une chanson (Vert pour selectionner, Rouge pour revenir en arriere): ";
+                /*cin >> numeroChanson;
+                while (numeroChanson <  1 || numeroChanson > repo.size() + 1) {
+                    cout << "Entree non valide. Veuillez entrer un numero de chanson valide" << endl;
+                    cin >> numeroChanson;
+                }*/
+                bool inputSelected = false;
+                while (!inputSelected)
+                {
+                    if (JoyDir == JOY_DIR_UP && !isSameEvaluatedJoyDir)
+                    {
+                        isSameEvaluatedJoyDir = true;
+                        if (choixChanson > 1)
+                        {
+                            choixChanson--;
+                            inputSelected = true;
+                        }
+                    }
+                    if (JoyDir == JOY_DIR_DN && !isSameEvaluatedJoyDir)
+                    {
+                        isSameEvaluatedJoyDir = true;
+                        if (choixChanson < repo_size + 1)
+                        {
+                            choixChanson++;
+                            inputSelected = true;
+                        }
+                    }
+                    if (Fret1 && !isSameEvaluatedFret1)
+                    {
+                        isSameEvaluatedFret1 = true;
+                        inputSelected = true;
+                        madeSongDecision = true;
+                    }
+                    if (Fret2 && !isSameEvaluatedFret2)
+                    {
+                        isSameEvaluatedFret2 = true;
+                        inputSelected = true;
+                        madeSongDecision = true;
+                        wantToReturn = true;
+                    }
+                }
+                if (choixChanson == repo_size + 1)
+                {
+                    wantToReturn = true;
+                }
             }
+            numeroChanson = choixChanson - 1;
 
 
             if (!wantToReturn)
             {
-                //choisir niveau de difficult�
-                system("CLS");
-                cout << "----------------------------------------------------------------------" << endl;
-                cout << "\t\t\tMENU NIVEAU DE DIFFICULTE" << endl;
-                cout << "----------------------------------------------------------------------\n" << endl;
-
-                cout << "1. Easy" << endl;
-                cout << "2. Medium" << endl;
-                cout << "3. Hard" << endl;
-                cout << "4. Expert" << endl;
-                cout << "5. Retour" << endl;
-
-                cout << "\nChoisissez le niveau de difficulte : ";
-                cin >> niveauDifficulte;
-                while (niveauDifficulte < 0 || niveauDifficulte > 5) {
-                    cout << "Entree non valide. Veuillez entrer un niveau de difficulte valide" << endl;
-                    cin >> niveauDifficulte;
-                }
-
-                if (niveauDifficulte == 5)
+                choixDifficulte = 1;
+                wantToReturn = false;
+                madeDifficultyDecision = false;
+                while (!madeDifficultyDecision)
                 {
-                    wantToReturn = true;
-                }
 
-                niveauDifficulte -= 1;
-                //case 3:
-                //    system("CLS");
-                //    cout << "Le jeu va debuter...!!\n" << endl;
-                //    if (*numeroChanson < 1 || *numeroChanson > 4 || *niveauDifficulte < 1 || *niveauDifficulte > 4) {
-                //        //chanson et difficulte par defaut 
-                //        *numeroChanson = 1;
-                //        *niveauDifficulte = 1;
-                //    }
-                //    cout << "Chanson choisie : " << listeChansons[*numeroChanson - 1] << endl;
-                //    cout << "Niveau de difficulte : " << listeDifficultes[*niveauDifficulte - 1] << "\n\n";
-                //    return true; //debuter le jeu
-                //    break;
+                    //choisir niveau de difficult�
+                    system("CLS");
+                    cout << "----------------------------------------------------------------------" << endl;
+                    cout << "\t\t\tMENU NIVEAU DE DIFFICULTE" << endl;
+                    cout << "----------------------------------------------------------------------\n" << endl;
+
+                    cout << "1. Easy" << printSelectionCursor(choixDifficulte, 1) << endl;
+                    cout << "2. Medium" << printSelectionCursor(choixDifficulte, 2) << endl;
+                    cout << "3. Hard" << printSelectionCursor(choixDifficulte, 3) << endl;
+                    cout << "4. Expert" << printSelectionCursor(choixDifficulte, 4) << endl;
+                    cout << "5. Retour" << printSelectionCursor(choixDifficulte, 5) << endl;
+
+                    cout << "\nChoisissez le niveau de difficulte (Vert pour selectionner, Rouge pour revenir en arriere): ";
+                    /*cin >> niveauDifficulte;
+                    while (niveauDifficulte < 0 || niveauDifficulte > 5) {
+                        cout << "Entree non valide. Veuillez entrer un niveau de difficulte valide" << endl;
+                        cin >> niveauDifficulte;
+                    }*/
+                    bool inputSelected = false;
+                    while (!inputSelected)
+                    {
+                        if (JoyDir == JOY_DIR_UP && !isSameEvaluatedJoyDir)
+                        {
+                            isSameEvaluatedJoyDir = true;
+                            if (choixDifficulte > 1)
+                            {
+                                choixDifficulte--;
+                                inputSelected = true;
+                            }
+                        }
+                        if (JoyDir == JOY_DIR_DN && !isSameEvaluatedJoyDir)
+                        {
+                            isSameEvaluatedJoyDir = true;
+                            if (choixDifficulte < 5)
+                            {
+                                choixDifficulte++;
+                                inputSelected = true;
+                            }
+                        }
+                        if (Fret1 && !isSameEvaluatedFret1)
+                        {
+                            isSameEvaluatedFret1 = true;
+                            inputSelected = true;
+                            madeDifficultyDecision = true;
+                        }
+                        if (Fret2 && !isSameEvaluatedFret2)
+                        {
+                            isSameEvaluatedFret2 = true;
+                            inputSelected = true;
+                            madeDifficultyDecision = true;
+                            wantToReturn = true;
+                        }
+                    }
+                    if (choixDifficulte == 5)
+                    {
+                        wantToReturn = true;
+                    }
+                    niveauDifficulte = choixDifficulte - 1;
+
+                    //case 3:
+                    //    system("CLS");
+                    //    cout << "Le jeu va debuter...!!\n" << endl;
+                    //    if (*numeroChanson < 1 || *numeroChanson > 4 || *niveauDifficulte < 1 || *niveauDifficulte > 4) {
+                    //        //chanson et difficulte par defaut 
+                    //        *numeroChanson = 1;
+                    //        *niveauDifficulte = 1;
+                    //    }
+                    //    cout << "Chanson choisie : " << listeChansons[*numeroChanson - 1] << endl;
+                    //    cout << "Niveau de difficulte : " << listeDifficultes[*niveauDifficulte - 1] << "\n\n";
+                    //    return true; //debuter le jeu
+                    //    break;
+                }
             }
 
             if (!wantToReturn)
@@ -874,19 +937,64 @@ bool MenuInitialisation(int& numeroChanson, int& niveauDifficulte, vector<Song> 
 
 //Fonction qui presente la premiere section du menu
 int displayMenu() {
-    system("CLS");
-    int choix;
-    cout << "----------------------------------------------------------------------" << endl;
-    cout << "\t\tMENU GUITAR HERO DEVELISH RELLISH" << endl;
-    cout << "----------------------------------------------------------------------\n" << endl;
-    cout << "   1. Debuter le jeu " << endl;
-    //cout << "   2. Informations " << endl;
-    cout << "   2. Quitter le jeu \n" << endl;
-    cout << "Choisissez une option : ";
-    cin >> choix;
-    while (choix < 1 || choix > 3) {
-        cout << "Choix non valide. Veuillez choisir une option valide" << endl;
-        cin >> choix;
+    bool madeAChoice = false;
+    int choix = 1;
+    while (!madeAChoice)
+    {
+        system("CLS");
+        cout << "----------------------------------------------------------------------" << endl;
+        cout << "\t\tMENU GUITAR HERO DEVELISH RELLISH" << endl;
+        cout << "----------------------------------------------------------------------\n" << endl;
+        cout << "   1. Debuter le jeu " << printSelectionCursor(choix, 1) << endl;
+        cout << "   2. Informations " << printSelectionCursor(choix, 2) << endl;
+        cout << "   3. Quitter le jeu" << printSelectionCursor(choix, 3) << endl;
+        cout << "\nChoisissez une option (Vert pour selectionner): ";
+        //cin >> choix;
+        /*while (choix < 1 || choix > 3) {
+            cout << "Choix non valide. Veuillez choisir une option valide" << endl;
+            cin >> choix;
+        }*/
+
+        bool inputSelected = false;
+        while (!inputSelected)
+        {
+            if (JoyDir == JOY_DIR_UP && !isSameEvaluatedJoyDir)
+            {
+                isSameEvaluatedJoyDir = true;
+                if (choix > 1)
+                {
+                    choix--;
+                    inputSelected = true;
+                }
+            }
+            if (JoyDir == JOY_DIR_DN && !isSameEvaluatedJoyDir)
+            {
+                isSameEvaluatedJoyDir = true;
+                if (choix < 3)
+                {
+                    choix++;
+                    inputSelected = true;
+                }
+            }
+            if (Fret1 && !isSameEvaluatedFret1)
+            {
+                isSameEvaluatedFret1 = true;
+                inputSelected = true;
+                madeAChoice = true;
+            }
+        }
     }
+    
     return choix;
+}
+
+string printSelectionCursor(int selected, int lineIndex)
+{
+    if (selected == lineIndex)
+    {
+        return " <---";
+    }
+    else {
+        return "";
+    }
 }
