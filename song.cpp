@@ -296,13 +296,13 @@ void Song::consolidateChords(int difficulty){
   int chordSize = chords->size();
   // Go through all the chords
   for (int i=0; i<chordSize; i++){
-    ChordNote currentChord = chords->at(i);
+    ChordNote * currentChord = &chords->at(i);
     // Check if any other chord past the current one
     // has the same start and end time
     for (int j=i+1; j<chordSize; j++){
       ChordNote nextChord = chords->at(j);
-      if (currentChord.getStart() == nextChord.getStart() &&
-          currentChord.getEnd() == nextChord.getEnd()){
+      if (currentChord->getStart() == nextChord.getStart() &&
+          currentChord->getEnd() == nextChord.getEnd()){
         // If so:
         // - add the fret to the current chord
         // - remove the next one
@@ -316,7 +316,7 @@ void Song::consolidateChords(int difficulty){
         nextChord.print();
         std::cout << " =";
         #endif // DEBUG
-        currentChord.merge(nextChord);
+        currentChord->merge(nextChord);
         #ifdef DEBUG
         currentChord.print();
         #endif

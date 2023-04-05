@@ -28,6 +28,7 @@ using namespace std;
 #define STRUM_DN 6
 #define JOY_DIR 7
 #define ACCEL 8
+#define MUONS 9
 
 #define JOY_DIR_UP 3
 #define JOY_DIR_DN 4
@@ -45,6 +46,7 @@ int GetLedState();
 int displayMenu();
 bool MenuInitialisation(int& numeroChanson, int& niveauDifficulte, vector<Song> repo);
 string printSelectionCursor(int selected, int lineIndex);
+void printEndOfSongScreen(int difficulty, Song song, int maxStreak, int points, int nbNotesReussies, int nbNotesSong);
 
 
 /*---------------------------- Variables globales ---------------------------*/
@@ -62,6 +64,7 @@ int IsShaking = 0;
 int NotesCorrectStreak = 0;
 bool BargraphNeedReset = false;
 bool IsInPowerup = false;
+bool IsInDivineIntervention = false;
 int consecutiveStrumUP = 0;
 int consecutiveStrumDN = 0;
 
@@ -76,6 +79,10 @@ bool isSameEvaluatedJoyDir = false;
 bool isSameEvaluatedFret1 = false;
 bool isSameEvaluatedFret2 = false;
 bool isInMenu = false;
+
+int MuonsCount = 0;
+
+int NB_NOTES_TO_INCREASE_POWERUP = 1;
 
 
 int main()
@@ -105,6 +112,10 @@ int main()
     {
         for (int i = 0; i < repertoire.size(); i++)
         {
+            if (difficulty == 3 && i == 2)
+            {
+                int bleh = 2;
+            }
             repertoire[i].parseSync();
             repertoire[i].parseChords(difficulty);
             repertoire[i].consolidateChords(difficulty);
@@ -151,10 +162,7 @@ int main()
 
         string displayString;
 
-        const int POWERUP_LENGTH = 5000;
-
         const int NB_SQUARES = 50;
-
         const int FRAMERATE = 50;
         int renderStart = FRAMERATE * (NB_SQUARES);
 
@@ -172,27 +180,33 @@ int main()
             }
         }
 
-        // Structure de donnees JSON pour envoie et reception
-        json j_msg_send, j_msg_rcv;
-
-        auto startTime = chrono::steady_clock::now();
         // TODO: Check if this command works as intended:
         /* PlaySound(TEXT(song.getAudioFile().c_str()), NULL, SND_ASYNC); */
+
+        auto startTime = chrono::steady_clock::now();
+
         double totalDiff = 0;
         auto lastPrintTime = chrono::steady_clock::now();;
         bool SongNotDone = true;
 
         int nextRenderNoteIndex = 0;
         int nextNoteToPlay = 0;
-        //int nbNotesCorrect = 0;
         int points = 0;
         bool hasLetGoHold = false;
         int lastCorrectHoldTime = 0;
         bool isPreviousNoteReussie = false;
 
         int powerupStartTime = 0;
+        const int POWERUP_LENGTH = 15000;
+        int divineInterventionStartTime = 0;
+        const int DIVINE_INTERVENTION_LENGTH = 15000;
+        int lastDivineInterventionChecktime = 0;
+        const int DIVINE_INTERVENTION_CHECK_INTERVALL = 10000;
+        const int DIVINE_INVERVENTION_ODDS = 5; //1 out of x (10)
         int powerupModifier = 1;
+
         int NbNotesReussies = 0;
+        int MaxStreak = 0;
 
         int endOfSong = song[song.size() - 1].getEnd();
         if (endOfSong == 0)
@@ -201,6 +215,7 @@ int main()
         }
         endOfSong += 500;
 
+        MuonsCount = 0;
         while (SongNotDone)
         {
             auto currentTime = chrono::steady_clock::now();
@@ -211,6 +226,8 @@ int main()
             {
                 /*isThreadOver = true;
                 worker.join();*/
+                MaxStreak = max(MaxStreak, NotesCorrectStreak);
+                printEndOfSongScreen(difficulty, repertoire[songIndex], MaxStreak, points, NbNotesReussies, song.size());
                 SongNotDone = false;
             }
             else
@@ -232,7 +249,6 @@ int main()
                             bool isStrummed = CompareStrums();
                             if (isStrummed)
                             {
-                                //cout << " REUSSI A " << diffSinceBeginning << endl;
                                 NbNotesReussies++;
                                 bool* notes = song[nextNoteToPlay].getNotes();
                                 for (int i = 0; i < 5; i++)
@@ -255,6 +271,7 @@ int main()
                         bool isStrumming = CompareStrums();
                         if (isStrumming)
                         {
+                            MaxStreak = max(MaxStreak, NotesCorrectStreak);
                             NotesCorrectStreak = 0;
                             StreakWhenLastSend = 0;
                             points -= 10;
@@ -262,6 +279,7 @@ int main()
                         if (nextNoteStart < diffSinceBeginning && nextNoteToPlay < song.size())
                         {
                             nextNoteToPlay++;
+                            MaxStreak = max(MaxStreak, NotesCorrectStreak);
                             NotesCorrectStreak = 0;
                             StreakWhenLastSend = 0;
                             isPreviousNoteReussie = false;
@@ -304,21 +322,35 @@ int main()
                     }
                 }
 
+                //PowerUP and DivineIntervention
                 if (!IsInPowerup && IsShaking && LedState == 10)
                 {
                     IsInPowerup = true;
                     powerupStartTime = diffSinceBeginning;
-                    powerupModifier = 2;
+                    powerupModifier *= 2;
                 }
                 if (IsInPowerup && diffSinceBeginning - powerupStartTime > POWERUP_LENGTH)
                 {
                     IsInPowerup = false;
                     BargraphNeedReset = true;
-                    powerupModifier = 1;
+                    powerupModifier /= 2;
                 }
-
-                /*cout << "StrumUp : " << StrumUp << " --- ";
-                cout << "StrumDn : " << StrumDown << endl;*/
+                if (!IsInDivineIntervention && diffSinceBeginning - lastDivineInterventionChecktime > DIVINE_INTERVENTION_CHECK_INTERVALL)
+                {
+                    lastDivineInterventionChecktime = diffSinceBeginning;
+                    if (MuonsCount % DIVINE_INVERVENTION_ODDS == 0)
+                    {
+                        IsInDivineIntervention = true;
+                        divineInterventionStartTime = diffSinceBeginning;
+                        powerupModifier *= 2;
+                    }
+                }
+                if (IsInDivineIntervention && diffSinceBeginning - divineInterventionStartTime > DIVINE_INTERVENTION_LENGTH)
+                {
+                    IsInDivineIntervention = false;
+                    powerupModifier /= 2;
+                    lastDivineInterventionChecktime = diffSinceBeginning;
+                }
                 
                 //Gestion affichage
                 if (diffSinceBeginning % FRAMERATE == 0)
@@ -415,18 +447,30 @@ int main()
                     string timestampString = to_string(diffSinceBeginning);
                     string ledStateString = to_string(LedState);
                     string streakString = to_string(NotesCorrectStreak);
-                    string holdTimeString = to_string(points);
+                    string pointsString = to_string(points);
                     string powerupModifierString = to_string(powerupModifier);
+                    string muonsCountString = to_string(MuonsCount);
+                    string divineString = to_string(IsInDivineIntervention);
                     displayString += "Timestamp " + timestampString.substr(0, timestampString.find(".")) + " ms\n";
                     displayString += "Nb LEDs : " + ledStateString.substr(0, ledStateString.find(".")) + "/10\n";
                     displayString += "Nb notes de suite : " + streakString.substr(0, streakString.find(".")) + "\n";
-                    displayString += "Points : " + holdTimeString.substr(0, holdTimeString.find(".")) + "\n";
+                    displayString += "Points : " + pointsString.substr(0, pointsString.find(".")) + "\n";
+                    displayString += "Muons : " + muonsCountString.substr(0, muonsCountString.find(".")) + " --- DIVINE : " + divineString.substr(0, divineString.find(".")) + "\n";
+
                     if (IsInPowerup)
                     {
+                        if (IsInDivineIntervention)
+                        {
+                            displayString += "Multiplicateur : x" + powerupModifierString.substr(0, powerupModifierString.find(".")) + " --- POWERUP AND DIVINE INTERVENTION!!!!!\n";
+                        }
                         displayString += "Multiplicateur : x" + powerupModifierString.substr(0, powerupModifierString.find(".")) + " --- POWERUP !!!!!\n";
                     }
                     else
                     {
+                        if (IsInDivineIntervention)
+                        {
+                            displayString += "Multiplicateur : x" + powerupModifierString.substr(0, powerupModifierString.find(".")) + " --- DIVINE INTERVENTION!!!!!\n";
+                        }
                         displayString += "Multiplicateur : x" + powerupModifierString.substr(0, powerupModifierString.find(".")) + "\n";
                     }
 
@@ -615,6 +659,8 @@ void RcvJsonThread()
             lastReceivedJoyDir = tempJoyDir;
             IsShaking = json_recu[ACCEL];
 
+            MuonsCount += json_recu[MUONS];
+            //MuonsCount += rand() % 10 + 1;//rand() % range + min
             /*if (IsShaking)
             {
                 cout << "SENSIBILITE BEN TROP BASSE" << endl;
@@ -719,7 +765,7 @@ int GetLedState()
     }
     else
     {
-        if (NotesCorrectStreak % 1 == 0 && StreakWhenLastSend < NotesCorrectStreak)
+        if (NotesCorrectStreak % NB_NOTES_TO_INCREASE_POWERUP == 0 && StreakWhenLastSend < NotesCorrectStreak)
         {
             LedState++;
             StreakWhenLastSend = NotesCorrectStreak;
@@ -750,6 +796,7 @@ bool MenuInitialisation(int& numeroChanson, int& niveauDifficulte, vector<Song> 
     bool madeDifficultyDecision = false;
     int choixChanson = 1;
     int choixDifficulte = 1;
+    bool inputSelected = false;
 
     while (!madeADecision)
     {
@@ -788,7 +835,7 @@ bool MenuInitialisation(int& numeroChanson, int& niveauDifficulte, vector<Song> 
                     cout << "Entree non valide. Veuillez entrer un numero de chanson valide" << endl;
                     cin >> numeroChanson;
                 }*/
-                bool inputSelected = false;
+                inputSelected = false;
                 while (!inputSelected)
                 {
                     if (JoyDir == JOY_DIR_UP && !isSameEvaluatedJoyDir)
@@ -857,7 +904,7 @@ bool MenuInitialisation(int& numeroChanson, int& niveauDifficulte, vector<Song> 
                         cout << "Entree non valide. Veuillez entrer un niveau de difficulte valide" << endl;
                         cin >> niveauDifficulte;
                     }*/
-                    bool inputSelected = false;
+                    inputSelected = false;
                     while (!inputSelected)
                     {
                         if (JoyDir == JOY_DIR_UP && !isSameEvaluatedJoyDir)
@@ -920,8 +967,35 @@ bool MenuInitialisation(int& numeroChanson, int& niveauDifficulte, vector<Song> 
             }
 
             break;
-
         case 2:
+            system("CLS");
+            cout << "FLAMMING DEVELISH RELISH" << endl;
+            cout << "Projet de session S2-H23 de l'equipe P-05" << endl;
+            cout << "Benjamin Chaussé" << endl;
+            cout << "Simon Gagné" << endl;
+            cout << "Brenda Keimgou Tchio" << endl;
+            cout << "Guillaume Malgorn" << endl;
+            cout << "Gabriel Nadeau" << endl;
+            cout << "Zachary Poulin" << endl;
+
+            cout << "Appuyez sur Vert ou Rouge pour continuer" << endl;
+            inputSelected = false;
+            while (!inputSelected)
+            {
+                if (Fret1 && !isSameEvaluatedFret1)
+                {
+                    isSameEvaluatedFret1 = true;
+                    inputSelected = true;
+                }
+                if (Fret2 && !isSameEvaluatedFret2)
+                {
+                    isSameEvaluatedFret2 = true;
+                    inputSelected = true;
+                }
+            }
+            break;
+
+        case 3:
             system("CLS");
             cout << "A bientot, KEEP ON ROCKING!!" << endl;
             madeADecision = true;
@@ -996,5 +1070,45 @@ string printSelectionCursor(int selected, int lineIndex)
     }
     else {
         return "";
+    }
+}
+
+void printEndOfSongScreen(int difficulty, Song song, int maxStreak, int points, int nbNotesReussies, int nbNotesSong)
+{
+    LedState = 0;
+    system("CLS");
+    cout << song.getTitle() << " par " << song.getArtist() << endl;
+    cout << "Difficulte : ";
+    switch (difficulty)
+    {
+    case DIFFICULTY_EASY:
+        cout << "Easy" << endl;
+        break;
+    case DIFFICULTY_MEDIUM:
+        cout << "Medium" << endl;
+        break;
+    case DIFFICULTY_HARD:
+        cout << "Hard" << endl;
+        break;
+    case DIFFICULTY_EXPERT:
+        cout << "Expert" << endl;
+        break;
+    }
+    cout << nbNotesReussies * 100 / nbNotesSong << "%" << endl;
+    cout << points << " points" << endl;
+    cout << nbNotesReussies << " notes reussies" << endl;
+    cout << "Plus haute sequence de suite :" << maxStreak << endl;
+
+    cout << "\nAppuyer sur Vert pour continuer";
+
+    isInMenu = true;
+    bool inputSelected = false;
+    while (!inputSelected)
+    {
+        if (Fret1 && !isSameEvaluatedFret1)
+        {
+            isSameEvaluatedFret1 = true;
+            inputSelected = true;
+        }
     }
 }
