@@ -17,11 +17,13 @@ class Note : public QObject, public QGraphicsRectItem {
   Q_PROPERTY(QPointF pos READ pos WRITE setPos NOTIFY posChanged)
   public:
     Note(int fret, int height=NOTE_SHORT_HEIGHT);
+    Note(const Note& other);
     ~Note();
     QPointF pos() const;
     void setPos(const QPointF& pos);
     void setPos(const double x, const double y);
     int getFret(); // Used to know to which fret a note is associated
+    int getHeight(); // Used to know to which fret a note is associated
     void recolor(bool pressed);
   private:
     int fret; // 0:Green, 1:Red, 2:Yellow, 3:Blue, 4:Orange

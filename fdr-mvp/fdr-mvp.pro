@@ -1,4 +1,4 @@
-QT       += core gui
+QT       += core gui multimedia
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -16,6 +16,7 @@ SOURCES += \
     leftbar.cpp \
     note.cpp \
     song.cpp \
+    timestamp.cpp \
     ui.cpp \
     main.cpp
 
@@ -27,6 +28,7 @@ HEADERS += \
     leftbar.h \
     note.h \
     song.h \
+    timestamp.h \
     ui.h
 
 # Default rules for deployment.
@@ -34,5 +36,4 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-RESOURCES += \
-    resource.qrc
+RESOURCES +=

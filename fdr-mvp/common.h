@@ -38,5 +38,7 @@ int msToPx(int duration);
 int pxToMs(int length);
 // Count the number of true values in a bool array
 int countTrue(bool arr[], int size);
+// Calculates the number of nanoseconds that pass within one tick
+int nspt(const int nbpm, const int resolution);
 
 #endif // COMMON_H

@@ -9,8 +9,7 @@
 #include "gamescene.h"
 
 Chord::Chord(int start, int duration, bool toPlay[5]):
-  duration(duration),
-  start(start),
+  duration(duration), start(start), end(start+duration),
   rushStart(start+TOLERANCE_RUSHING),
   dragStart(start+TOLERANCE_DRAGGING),
   rushRelease( (duration!=0)? rushStart+duration : 0 ),
@@ -29,14 +28,29 @@ Chord::Chord(int start, int duration, bool toPlay[5]):
   }
 }
 
-Chord::~Chord(){
-  // Notes are dynamically generated, they must be destroyed
-  // Array is of length 5 but there are only noteNB ammount of notes in it
-  // Therefore, let's not iterate to five and delete non-existent notes
-  for (int i=0; i<noteNB; i++){
-    delete notes[i];
+Chord::Chord(int fret, int start, int end):
+  duration((end==0)?0:end-start),start(start),end(end),
+  rushStart(start+TOLERANCE_RUSHING),
+  dragStart(start+TOLERANCE_DRAGGING),
+  rushRelease((duration!=0)? rushStart+duration : 0 ),
+  dragRelease((duration!=0)? dragStart+duration : 0 ),
+  spawnTime(0), noteNB(1){
+  for (int i=0;i<5;i++){
+    notes[i] = (i==fret)? new Note(fret,msToPx(duration)): NULL;
   }
 }
+
+Chord::Chord(const Chord& chord):
+  start(chord.start),end(chord.end),duration(chord.duration),
+  rushStart(chord.rushStart),dragStart(chord.dragStart),
+  rushRelease(chord.rushRelease),dragRelease(chord.dragRelease),
+  noteNB(chord.noteNB),spawnTime(chord.spawnTime){
+  for (int i=0;i<5;i++){
+    notes[i] = chord.notes[i];
+  }
+}
+
+Chord::~Chord(){}
 
 // Spawn takes a chord and spawns it slightly above the user's screen.
 // Since every note moves in the exact same way, their animations are run
@@ -91,4 +105,57 @@ void Chord::spawn(GameScene* scene){
 void Chord::despawn(){
   qDebug() << "DELETING";
   delete this;
+}
+
+void Chord::merge(Chord* chord){
+  for (int i=0;i<5;i++){
+    if (chord->notes[i] != NULL){
+      noteNB++;
+      notes[i] = chord->notes[i];
+    }
+  }
+}
+
+void Chord::print(){
+  std::string states = "{";
+  for (int i=0;i<5;i++){
+    states += (notes[i]==NULL)? "_":"X";
+  }
+  states += "}";
+  qDebug() << QString::fromStdString(states)
+           << " Start:" << start
+           << " End:"   << end;
+}
+
+int Chord::getStart(){
+  return start;
+}
+
+
+int Chord::getEnd(){
+  return end;
+}
+
+Chord& Chord::operator=(const Chord& other) {
+    // Check for self-assignment
+    if (this == &other) {
+        return *this;
+    }
+    // Copy the non-constant member variables
+    rushStart = other.rushStart;
+    dragStart = other.dragStart;
+    rushRelease = other.rushRelease;
+    dragRelease = other.dragRelease;
+    spawnTime = other.spawnTime;
+    noteNB = other.noteNB;
+    // Copy the notes array (using the Note copy constructor)
+    bool toPlay[5]{0};
+    for (int i = 0; i < 5; i++) {
+        toPlay[i] = (other.notes[i]==NULL)?false:true;
+    }
+    for (int i=0; i<5; i++){
+      notes[i] = (toPlay[i])? new Note(i,msToPx(duration)):NULL;
+    }
+    // Return a reference to the updated object
+    return *this;
 }

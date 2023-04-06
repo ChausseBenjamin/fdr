@@ -32,3 +32,10 @@ int countTrue(bool arr[], int size) {
   for (int i=0; i<size; i++) ttl+=arr[i];
   return ttl;
 }
+
+// NanoSeconds per Tick
+int nspt(const int nbpm, const int resolution){
+  // nbpm: 133000 = 133bpm
+  // resolution: number of ticks per beat
+  return 60000000000 / (nbpm * resolution);
+}

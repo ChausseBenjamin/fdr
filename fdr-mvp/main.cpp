@@ -6,14 +6,21 @@
 #include <QUrl>
 
 #include "gamescene.h"
-#include "qscreen.h"
 #include "song.h"
+#include "qscreen.h"
 
 int main(int argc, char *argv[]) {
   QApplication a(argc, argv);
 
-  // Test the Song class
-  Song song =Song(QUrl("qrc:/"));
+  // Test song parsing:
+  Song testSong = Song("/home/master/Workspace/fdr/songs/Owane-Rock-Is-Too-Heavy/notes.chart");
+  testSong.parseSync();
+  testSong.printTimestamps();
+  for (int i=0;i<4;i++){
+    testSong.parseDifficulty(i);
+    testSong.printDifficulty(i);
+  }
+  testSong.play();
 
   // Get a list of the connected screens
   QList<QScreen*> screens = QGuiApplication::screens();

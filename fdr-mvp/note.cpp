@@ -37,3 +37,7 @@ int Note::getFret(){
 void Note::recolor(bool pressed){
   setBrush( pressed ? noteHitColor[fret] : noteIdleColor[fret] );
 }
+
+int Note::getHeight(){
+  return rect().height();
+}
