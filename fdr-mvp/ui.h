@@ -2,6 +2,7 @@
 #define UI_H
 
 #include <QColor>
+#include <QFont>
 
 // Unlike `common.h`, this header only contains general information about
 // the VISUAL interface: resolution, colors, geometry, etc...
@@ -27,6 +28,9 @@
 #define TEXT_COLOR_MAIN      QColor(242, 241, 240, 255)
 #define TEXT_COLOR_SECONDARY QColor(164, 160, 156, 255)
 #define TEXT_COLOR_DISCRETE  QColor(110, 100,  90, 255)
+// QFont       textFontMain;
+// QFont  textFontSecondary;
+// QFont   textFontDiscrete;
 // Text sizes
 // TODO: Configure
 // Spacing for text
@@ -41,5 +45,9 @@ extern QColor fretPressColor[5];
 extern QColor noteIdleColor[5];
 extern QColor noteHitColor[5];
 extern QColor bgGradient[2];
+
+// Text for the difficulties in the leftbar
+extern QColor difficultyShadows[4];
+extern std::string difficultyText[4];
 
 #endif // UI_H

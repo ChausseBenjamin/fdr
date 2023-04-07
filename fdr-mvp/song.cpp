@@ -290,7 +290,8 @@ void Song::play(int difficulty){
   leftbar->setTitle(title);
   leftbar->setAlbum(album);
   leftbar->setAuthor(artist);
-  leftbar->setYear(year);
+  // leftbar->setYear(year);
+  // leftbar->setYear(mediaPlayer.LoadedState());
   leftbar->setDifficulty(difficulty);
   // Select the correct difficulty
   std::vector<Chord>* allDiff[4] = {
@@ -336,8 +337,8 @@ void Song::setSpawnTimings(int difficulty){
              << "and it's dimensions";
     return;
   }
-  const int totalPx = NOTE_SHORT_HEIGHT + scene->getFret(0)->pos().x();
-  // const int totalPx = scene->getFret(0)->pos().x();
+  const int totalPx = (FRET_HEIGHT/2) + scene->getFret(0)->pos().y();
+  // const int travelTime = pxToMs(totalPx)+530;
   const int travelTime = pxToMs(totalPx);
   std::vector<Chord>* allDiffs[4] = {
     &easy, &medium, &hard, &expert

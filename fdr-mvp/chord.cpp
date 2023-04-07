@@ -42,10 +42,10 @@ Chord::Chord(int fret, int start, int end):
 }
 
 Chord::Chord(const Chord& chord):
-  start(chord.start),end(chord.end),duration(chord.duration),
+  duration(chord.duration),start(chord.start),end(chord.end),
   rushStart(chord.rushStart),dragStart(chord.dragStart),
   rushRelease(chord.rushRelease),dragRelease(chord.dragRelease),
-  noteNB(chord.noteNB),spawnTime(chord.spawnTime){
+  spawnTime(chord.spawnTime),noteNB(chord.noteNB){
   for (int i=0;i<5;i++){
     notes[i] = chord.notes[i];
   }

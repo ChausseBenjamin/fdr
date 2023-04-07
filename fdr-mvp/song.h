@@ -46,6 +46,7 @@ class Song:public QObject {
     int currentChord;
     std::vector<Chord>* currentDifficulty;
     void checkChords();
+    void parseInfo();
   public:
     std::vector<Chord> easy;
     std::vector<Chord> medium;
@@ -55,7 +56,6 @@ class Song:public QObject {
     Song(QString chartfile);
     ~Song();
     // File parsing (and related functions)
-    void parseInfo();
     void parseSync();
     bool parseDifficulty(int difficulty);
     void setSpawnTimings(int difficulty);

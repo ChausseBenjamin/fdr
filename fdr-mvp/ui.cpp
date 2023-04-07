@@ -39,3 +39,17 @@ QColor bgGradient[2] = {
   QColor(69, 0, 0), // Dark Red
   QColor(30, 0, 69) // Dark Purple
 };
+
+// Text Shadow colors for the various difficulties
+QColor difficultyShadows[4]{
+  QColor(  0, 100,   0, 204),
+  QColor(128, 128,   0, 204),
+  QColor(139,   0,   0, 204),
+  QColor(  0,   0, 205, 204)
+};
+
+// Text that is written for each difficulty?
+std::string difficultyText[4] = {
+  "Are you a baby?", "Casual", "Respect", "Flaming Devilish Relish"
+};
+
