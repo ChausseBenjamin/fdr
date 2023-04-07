@@ -10,7 +10,8 @@
 // This is the only place where time is measured in seconds
 // Otherwise, time is always measured in milliseconds
 // TODO: Perhaps make game speed configurable in a settings tab/screen/window
-#define GAME_SPEED 500 // how fast notes drop (px/s)
+#define GAME_SPEED 600 // how fast notes drop (px/s)
+// #define GAME_SPEED 500 // how fast notes drop (px/s)
 #define REFRESH_RATE 60 // fps
 #define PX_PER_FRAME GAME_SPEED/REFRESH_RATE
 #define MS_PER_FRAME 1000/REFRESH_RATE

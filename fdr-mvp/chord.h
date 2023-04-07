@@ -19,13 +19,15 @@ class Chord:public QObject {
     Chord(const Chord& chord);            // Copy constructor
     Chord& operator=(const Chord& other);
     ~Chord();
-    void spawn(GameScene* scene); // Draw the notes and launch them
+    void spawn(GameScene* scene) const; // Draw the notes and launch them
     void merge(Chord* chord);
     void print();
     int getStart();
     int getEnd();
+    int getSpawnTime() const;
+    void setSpawnTime(int ms);
   public slots:
-    void despawn(); // Delete the chord once offscreen
+    void despawn() const; // Delete the chord once offscreen
   private:
     const int duration;    // ms (0 if the note is a single stroke)
     const int start;       // Real time (in ms) at which the note should be hit

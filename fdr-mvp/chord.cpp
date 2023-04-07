@@ -34,9 +34,10 @@ Chord::Chord(int fret, int start, int end):
   dragStart(start+TOLERANCE_DRAGGING),
   rushRelease((duration!=0)? rushStart+duration : 0 ),
   dragRelease((duration!=0)? dragStart+duration : 0 ),
-  spawnTime(0), noteNB(1){
-  for (int i=0;i<5;i++){
-    notes[i] = (i==fret)? new Note(fret,msToPx(duration)): NULL;
+  noteNB(1){
+  notes[0] = new Note(fret,msToPx(duration));
+  for (int i=1;i<5;i++){
+    notes[i] = NULL;
   }
 }
 
@@ -56,10 +57,9 @@ Chord::~Chord(){}
 // Since every note moves in the exact same way, their animations are run
 // in parallel. This improves performance and makes sure notes of a chord are
 // alway at the same height.
-void Chord::spawn(GameScene* scene){
+void Chord::spawn(GameScene* scene) const{
   // Get the height of the notes in the chord (it's the same for all)
-  const double noteH  = notes[0]->rect().height();
-  // Y distance to from the top of the screen to the end of the animation
+  double noteH = notes[0]->rect().height();
   const double yDist = scene->height()+OFFSCREEN_NOTE_MARGIN;
   // Time during which the note should move
   const int timeline = pxToMs(noteH+yDist);
@@ -100,18 +100,25 @@ void Chord::spawn(GameScene* scene){
   groupAnimation->start();
 }
 
+void Chord::setSpawnTime(int ms){
+  spawnTime=ms;
+}
+
 // Called when animation finishes
 // Destroys the chord (and it's notes)
-void Chord::despawn(){
+void Chord::despawn() const{
   qDebug() << "DELETING";
-  delete this;
+  for (int i=0;i<noteNB;i++){
+    delete notes[i];
+  }
+  // delete this;
 }
 
 void Chord::merge(Chord* chord){
   for (int i=0;i<5;i++){
     if (chord->notes[i] != NULL){
-      noteNB++;
-      notes[i] = chord->notes[i];
+      notes[noteNB++] = chord->notes[i];
+      // noteNB++;
     }
   }
 }
@@ -123,8 +130,11 @@ void Chord::print(){
   }
   states += "}";
   qDebug() << QString::fromStdString(states)
+           << " NoteNB:" << noteNB
            << " Start:" << start
-           << " End:"   << end;
+           << " End:"   << end
+           << " Duration:" << duration
+           << " Spawn time:" << spawnTime;
 }
 
 int Chord::getStart(){
@@ -134,6 +144,10 @@ int Chord::getStart(){
 
 int Chord::getEnd(){
   return end;
+}
+
+int Chord::getSpawnTime() const{
+  return spawnTime;
 }
 
 Chord& Chord::operator=(const Chord& other) {

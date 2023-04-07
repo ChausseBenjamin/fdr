@@ -4,12 +4,20 @@
 #include <QDebug>
 #include <regex>
 #include <QMediaPlayer>
+#include <QObject>
+#include <QThread>
 
 #include "song.h"
+#include "ui.h"
 #include "common.h"
 #include "timestamp.h"
 
 Song::Song(QString chartfile): chartfile(chartfile) {
+  for (int i=0;i<4;i++){
+    availableDifficulty[i] = false;
+  }
+  scene = NULL;
+  mediaPlayer.setNotifyInterval(1);
   parseInfo();
   printInfo();
 };
@@ -21,6 +29,7 @@ void Song::parseInfo(){
   std::size_t lastSlash = stdAudio.find_last_of("/");
   stdAudio = stdAudio.substr(0,lastSlash+1)+"song.wav";
   audiofile = QString::fromStdString(stdAudio);
+  mediaPlayer.setMedia(QUrl::fromLocalFile(audiofile));
   std::string tokens[5] = {
     "Name", "Artist", "Album",
     "Year", "Charter"
@@ -126,29 +135,35 @@ void Song::parseSync(){
 bool Song::parseDifficulty(int difficulty){
   // The token and chosen vector are modular.
   // They adapt to the input difficulty
-  std::vector<Chord>* chords; // Vector to use
-  std::string token;          // Pattern to match to start parsing
-  switch (difficulty){
-    case DIFFICULTY_EASY:
-      token  = "EasySingle";
-      chords = &easy;
-      break;
-    case DIFFICULTY_MEDIUM:
-      token  = "MediuSingle";
-      chords = &medium;
-      break;
-    case DIFFICULTY_HARD:
-      token  = "HardSingle";
-      chords = &hard;
-      break;
-    case DIFFICULTY_EXPERT:
-      token  = "ExpertSingle";
-      chords = &expert;
-      break;
-    default:
-      qDebug() << "Requested difficulty is invalid";
-      return false;
-  }
+  std::vector<Chord>* allDiffs[4] = {
+    &easy, &medium, &hard, &expert
+  };
+  std::vector<Chord>* chords = allDiffs[difficulty]; // Vector to use
+  std::string allTokens[4] = {
+    "EasySingle", "MediumSingle", "HardSingle", "ExpertSingle"
+  };
+  std::string token = allTokens[difficulty];          // Pattern to match to start parsing
+  // switch (difficulty){
+    // case DIFFICULTY_EASY:
+      // token  = "EasySingle";
+      // chords = &easy;
+      // break;
+    // case DIFFICULTY_MEDIUM:
+      // token  = "MediuSingle";
+      // chords = &medium;
+      // break;
+    // case DIFFICULTY_HARD:
+      // token  = "HardSingle";
+      // chords = &hard;
+      // break;
+    // case DIFFICULTY_EXPERT:
+      // token  = "ExpertSingle";
+      // chords = &expert;
+      // break;
+    // default:
+      // qDebug() << "Requested difficulty is invalid";
+      // return false;
+  // }
   std::ifstream file( chartfile.toStdString() );
   if (!file.is_open()){
     qDebug() << "Error opening file";
@@ -193,6 +208,7 @@ bool Song::parseDifficulty(int difficulty){
       } else if (line.find("[")!=std::string::npos){
         file.close();
         consolidate(difficulty);
+        availableDifficulty[difficulty] = true;
         return true;
       }
     }
@@ -202,24 +218,10 @@ bool Song::parseDifficulty(int difficulty){
 }
 
 void Song::consolidate(int difficulty){
-  std::vector<Chord>* chords;
-  switch (difficulty){
-    case DIFFICULTY_EASY:
-      chords = &easy;
-      break;
-    case DIFFICULTY_MEDIUM:
-      chords = &medium;
-      break;
-    case DIFFICULTY_HARD:
-      chords = &hard;
-      break;
-    case DIFFICULTY_EXPERT:
-      chords = &expert;
-      break;
-    default:
-      qDebug() << "Invalid difficulty provided";
-      return;
-  }
+  std::vector<Chord>* allDiffs[4] = {
+    &easy, &medium, &hard, &expert
+  };
+  std::vector<Chord>* chords = allDiffs[difficulty];
   int chordSize = chords->size();
   for (int i=0;i<chordSize;i++){
     Chord* currentChord = &(chords->at(i));
@@ -283,7 +285,70 @@ void Song::printDifficulty(int difficulty){
 }
 
 void Song::play(int difficulty){
-  mediaPlayer.setMedia(QUrl::fromLocalFile(audiofile));
-  mediaPlayer.setVolume(50);
+  // Select the correct difficulty
+  std::vector<Chord>* allDiff[4] = {
+    &easy, &medium, &hard, &expert
+  };
+  // Fill the Chord buffer
+  currentDifficulty = allDiff[difficulty];
+  setSpawnTimings(difficulty);
+  // Start at the 0th note:
+  qDebug() << "LOADING CHORDS TO THE BUFFER (PLAY)";
+  currentChord=0;
+  // while (currentChord < CHORD_BUFFER_SIZE){
+    // chordBuffer[currentChord] = &currentDifficulty->at(currentChord++);
+    // chordBuffer[currentChord]->print();
+  // }
+  // Initialise the checking timer
+  clock = new QTimer(this);
+  connect(clock, &QTimer::timeout,this,&Song::checkChords);
+  clock->start(1);
+  mediaPlayer.setVolume(10);
   mediaPlayer.play();
+}
+
+void Song::checkChords(){
+  // for (int i=0;i<CHORD_BUFFER_SIZE;i++){
+    // qDebug() << "BEGIN CHECKCHORD SEQUENCE";
+    // chordBuffer[i]->print();
+  if (currentChord+1 >= currentDifficulty->size()) return;
+  if (qint64(currentDifficulty->at(currentChord).getSpawnTime()) <= mediaPlayer.position()){
+    currentDifficulty->at(currentChord).print();
+    qDebug() << "Spawning chord" << currentChord
+             << "at" << mediaPlayer.position() << "ms";
+    currentDifficulty->at(currentChord++).spawn(scene);
+    // chordBuffer[i] = &currentDifficulty->at(currentChord++);
+  }
+  // }
+}
+
+void Song::setSpawnTimings(int difficulty){
+  if (scene==NULL) {
+    qDebug() << "Setting spawn timing requires to know the scene"
+             << "and it's dimensions";
+    return;
+  }
+  const int totalPx = NOTE_SHORT_HEIGHT + scene->getFret(0)->pos().x();
+  // const int totalPx = scene->getFret(0)->pos().x();
+  const int travelTime = pxToMs(totalPx);
+  std::vector<Chord>* allDiffs[4] = {
+    &easy, &medium, &hard, &expert
+  };
+  std::vector<Chord>* chords = allDiffs[difficulty];
+  for (int i=0;i<chords->size();i++){
+    chords->at(i).setSpawnTime( chords->at(i).getStart()-travelTime );
+  }
+
+}
+
+std::vector<Chord>* Song::getChords(int difficulty){
+  std::vector<Chord>* allDiffs[4] = {
+    &easy, &medium, &hard, &expert
+  };
+  std::vector<Chord>* chords = allDiffs[difficulty];
+  return chords;
+}
+
+void Song::setScene(GameScene* newScene){
+  scene = newScene;
 }
