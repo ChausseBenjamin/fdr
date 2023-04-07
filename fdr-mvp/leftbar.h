@@ -19,7 +19,7 @@ class LeftBar {
     void setTitle(const QString text);
     void setAlbum(const QString text);
     void setAuthor(const QString text);
-    void setYear(const int year);
+    void setYear(const QString year);
     void setDuration(const int duration);
     void setDifficulty(const int difficulty);
 };

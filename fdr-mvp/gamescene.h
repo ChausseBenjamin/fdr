@@ -17,6 +17,7 @@ class GameScene : public QGraphicsScene {
     ~GameScene();
     void recolor(bool states[5]); // Updates all fret colors (pressed/released)
     Fret* getFret(int index);
+    LeftBar* getLeftBar();
   private:
     LeftBar* leftbar;
     Fret* frets[5]; // At the bottom of the screen

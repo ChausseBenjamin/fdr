@@ -37,6 +37,10 @@ Fret* GameScene::getFret(int index){
   return frets[index];
 }
 
+LeftBar* GameScene::getLeftBar(){
+  return leftbar;
+}
+
 // Sets the color of the different fret buttons according to their
 // current states (pressed or not).
 // The states are provided externally by the `bool states[5]` argument.

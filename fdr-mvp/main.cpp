@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
     testSong.printDifficulty(i);
   }
   testSong.setScene(scene);
-  testSong.play(DIFFICULTY_EASY);
+  testSong.play(DIFFICULTY_HARD);
 
   // Display the viewport
   view->show();

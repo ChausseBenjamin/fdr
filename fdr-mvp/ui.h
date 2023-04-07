@@ -13,14 +13,14 @@
 // #define GAME_WIDTH  1920
 
 // Onscreen dimensions of frets
-#define FRET_WIDTH    60
-#define FRET_HEIGHT   30
+#define FRET_WIDTH    80
+#define FRET_HEIGHT   40
 #define FRET_MARGIN_X 30 // space between frets
 #define FRET_MARGIN_Y 30 // space between the screen's bottom and the frets
 
 // Onscreen dimensions of notes
-#define NOTE_WIDTH 50
-#define NOTE_SHORT_HEIGHT 20 // Default height for single stroke notes
+#define NOTE_WIDTH 65
+#define NOTE_SHORT_HEIGHT 30 // Default height for single stroke notes
 #define OFFSCREEN_NOTE_MARGIN 30 // distance offscreen before deleting notes
 
 // Text on the Game

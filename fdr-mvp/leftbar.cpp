@@ -37,3 +37,34 @@ LeftBar::LeftBar(QGraphicsScene* scene) {
   for (int i=0; i<6; i++) scene->addItem(elements[i]);
 }
 
+void LeftBar::setTitle(const QString text){
+  title->setPlainText(text);
+}
+
+void LeftBar::setAlbum(const QString text){
+  album->setPlainText(text);
+}
+
+void LeftBar::setAuthor(const QString text){
+  author->setPlainText(text);
+}
+
+void LeftBar::setYear(const QString year){
+  this->year->setPlainText(year);
+}
+
+void LeftBar::setDuration(const int duration){
+  // int minutes = duration/(1000*60);
+  // int seconds = (duration%(1000*60)) / 1000;
+  // this->duration->setPlainText( QString::number(minutes)+":"+QString::number(seconds) );
+  this->duration->setPlainText(QString::number(duration));
+}
+
+void LeftBar::setDifficulty(int difficulty){
+  std::string diffNames[4] = {
+    "Are you a baby?", "Casual", "Respect", "Flaming Devilish Relish"
+  };
+  this->difficulty->setPlainText(
+      "Mode: "+QString::fromStdString(diffNames[difficulty])
+    );
+}

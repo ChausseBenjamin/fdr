@@ -9,6 +9,7 @@
 
 #include "song.h"
 #include "ui.h"
+#include "leftbar.h"
 #include "common.h"
 #include "timestamp.h"
 
@@ -285,6 +286,12 @@ void Song::printDifficulty(int difficulty){
 }
 
 void Song::play(int difficulty){
+  LeftBar* leftbar = scene->getLeftBar();
+  leftbar->setTitle(title);
+  leftbar->setAlbum(album);
+  leftbar->setAuthor(artist);
+  leftbar->setYear(year);
+  leftbar->setDifficulty(difficulty);
   // Select the correct difficulty
   std::vector<Chord>* allDiff[4] = {
     &easy, &medium, &hard, &expert
@@ -303,7 +310,8 @@ void Song::play(int difficulty){
   clock = new QTimer(this);
   connect(clock, &QTimer::timeout,this,&Song::checkChords);
   clock->start(1);
-  mediaPlayer.setVolume(10);
+  mediaPlayer.setVolume(50);
+  leftbar->setDuration(mediaPlayer.duration());
   mediaPlayer.play();
 }
 
