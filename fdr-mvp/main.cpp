@@ -44,28 +44,26 @@ int main(int argc, char *argv[]) {
     "/home/master/Workspace/fdr/songs/Victor-Wooten-and-Steve-Bailey-A-Chick-from-Corea-(Live)/notes.chart"
   };
 
-  // Test song parsing:
-  // Song testSong = Song("/home/master/Workspace/fdr/songs/Owane-Rock-Is-Too-Heavy/notes.chart");
-  // Song testSong = Song("/home/master/Workspace/fdr/songs/Greta-Van-Fleet-Highway-Tune/notes.chart");
-  // testSong.parseSync();
-  // testSong.printTimestamps();
-  // for (int i=0;i<4;i++){
-    // testSong.parseDifficulty(i);
-    // testSong.printDifficulty(i);
-  // }
-  // testSong.setScene(scene);
-  // testSong.play(DIFFICULTY_HARD);
   Song* repertoire[10];
   for (int i=0;i<10;i++){
     repertoire[i] = new Song(songFiles[i]);
-    repertoire[i]->parseSync();
-    repertoire[i]->setScene(scene);
     for (int j=0;j<4;j++){
-      repertoire[i]->parseDifficulty(j);
-    }
-  }
+    };
+  };
+  int wantedDiff = DIFFICULTY_HARD;
+  int wantedSong = 0;
+  repertoire[wantedSong]->parseSync();
+  repertoire[wantedSong]->setScene(scene);
+  repertoire[wantedSong]->parseDifficulty(wantedDiff);
+  repertoire[wantedSong]->play(wantedDiff);
 
-  repertoire[1]->play(0);
+  // int wantedDiff = DIFFICULTY_EASY;
+  // Song* testSong = new Song(songFiles[5]);
+  // testSong->parseSync();
+  // testSong->setScene(scene);
+  // testSong->parseDifficulty(wantedDiff);
+  // testSong->play(wantedDiff);
+
 
   // Display the viewport
   view->show();

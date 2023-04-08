@@ -163,13 +163,14 @@ Chord& Chord::operator=(const Chord& other) {
     spawnTime = other.spawnTime;
     noteNB = other.noteNB;
     // Copy the notes array (using the Note copy constructor)
-    bool toPlay[5]{0};
-    for (int i = 0; i < 5; i++) {
-        toPlay[i] = (other.notes[i]==NULL)?false:true;
+    // bool toPlay[5]{0};
+    for (int i = 0;i<other.noteNB;i++) {
+      notes[i] = new Note(other.notes[i]->getFret(),msToPx(duration));
+      // toPlay[other.notes[i]->getFret()]=true;
     }
-    for (int i=0; i<5; i++){
-      notes[i] = (toPlay[i])? new Note(i,msToPx(duration)):NULL;
-    }
+    // for (int i=0; i<5; i++){
+      // notes[i] = (toPlay[i])? new Note(i,msToPx(duration)):NULL;
+    // }
     // Return a reference to the updated object
     return *this;
 }
