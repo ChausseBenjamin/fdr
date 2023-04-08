@@ -1,5 +1,8 @@
 # Created by https://www.toptal.com/developers/gitignore/api/c++,vim,tags,qt,qtcreator,c,visualstudio,visualstudiocode,emacs
 # Edit at https://www.toptal.com/developers/gitignore?templates=c++,vim,tags,qt,qtcreator,c,visualstudio,visualstudiocode,emacs
+#
+.vscode
+bkp/
 
 ### C ###
 # Prerequisites
