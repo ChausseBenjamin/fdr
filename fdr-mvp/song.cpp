@@ -144,27 +144,6 @@ bool Song::parseDifficulty(int difficulty){
     "EasySingle", "MediumSingle", "HardSingle", "ExpertSingle"
   };
   std::string token = allTokens[difficulty];          // Pattern to match to start parsing
-  // switch (difficulty){
-    // case DIFFICULTY_EASY:
-      // token  = "EasySingle";
-      // chords = &easy;
-      // break;
-    // case DIFFICULTY_MEDIUM:
-      // token  = "MediuSingle";
-      // chords = &medium;
-      // break;
-    // case DIFFICULTY_HARD:
-      // token  = "HardSingle";
-      // chords = &hard;
-      // break;
-    // case DIFFICULTY_EXPERT:
-      // token  = "ExpertSingle";
-      // chords = &expert;
-      // break;
-    // default:
-      // qDebug() << "Requested difficulty is invalid";
-      // return false;
-  // }
   std::ifstream file( chartfile.toStdString() );
   if (!file.is_open()){
     qDebug() << "Error opening file";
@@ -186,7 +165,7 @@ bool Song::parseDifficulty(int difficulty){
         int duration = std::stoi(match[3]);
         // We need to find the timestamp with the closest tick that's smaller
         int timestampIndex = 0; // NOTE: This could be optimized by starting where the previous chord left off
-        for (int i=0; i<timestamps.size(); i++){
+        for (uint i=0; i<timestamps.size(); i++){
           if (timestamps[i].getTick() < tick) timestampIndex = i;
           else break;
         }
@@ -204,7 +183,6 @@ bool Song::parseDifficulty(int difficulty){
           const long int chordDuration = nspt(tsBPM, resolution) * duration;
           chordEnd = chordTime + chordDuration;
         }
-        // TODO: check if this division correctly sets chords to milliseconds
         chords->push_back(Chord(fret,chordTime/1000,chordEnd/1000));
       } else if (line.find("[")!=std::string::npos){
         file.close();
@@ -225,12 +203,12 @@ void Song::consolidate(int difficulty){
   std::vector<Chord>* chords = allDiffs[difficulty];
   int chordSize = chords->size();
   for (int i=0;i<chordSize;i++){
-    Chord* currentChord = &(chords->at(i));
+    Chord* cChord = &(chords->at(i));
     for (int j=i+1;j<chordSize;j++){
       Chord* nextChord = &(chords->at(j));
-      if ( (currentChord->getStart() == nextChord->getStart()) &&
-           (currentChord->getEnd()   == nextChord->getEnd()) ){
-        currentChord->merge(nextChord);
+      if ( (cChord->getStart() == nextChord->getStart()) &&
+           (cChord->getEnd()   == nextChord->getEnd()) ){
+        cChord->merge(nextChord);
         chords->erase(chords->begin()+j);
         chordSize--;
       }
@@ -249,7 +227,7 @@ void Song::printInfo(){
 }
 
 void Song::printTimestamps(){
-  for (int i=0; i<timestamps.size(); i++){
+  for (uint i=0; i<timestamps.size(); i++){
     qDebug()  << " Tick: " << timestamps[i].getTick()
               << " BPM: " << timestamps[i].getBPM()
               << " Time: " << timestamps[i].getTime() << "ns";
@@ -280,7 +258,7 @@ void Song::printDifficulty(int difficulty){
       qDebug() << "Requested difficulty is invalid";
       return;
   }
-  for (int i=0;i<chords->size();i++){
+  for (uint i=0;i<chords->size();i++){
     (*chords)[i].print();
   }
 }
@@ -301,35 +279,52 @@ void Song::play(int difficulty){
   currentDifficulty = allDiff[difficulty];
   setSpawnTimings(difficulty);
   // Start at the 0th note:
-  qDebug() << "LOADING CHORDS TO THE BUFFER (PLAY)";
-  currentChord=0;
-  // while (currentChord < CHORD_BUFFER_SIZE){
-    // chordBuffer[currentChord] = &currentDifficulty->at(currentChord++);
-    // chordBuffer[currentChord]->print();
-  // }
+  qDebug() << "INITIATING SONG:";
+  currentSpawnChord=0;
+  currentScoreChord=0;
+  // for (int i=0;i<5;i++) scoreTab[i] =0;
   // Initialise the checking timer
   clock = new QTimer(this);
-  connect(clock, &QTimer::timeout,this,&Song::checkChords);
+  connect(clock, &QTimer::timeout,this,&Song::spawnHandler);
+  connect(clock, &QTimer::timeout,this,&Song::scoreHandler);
   clock->start(1);
   mediaPlayer.setVolume(50);
   leftbar->setDuration(mediaPlayer.duration());
   mediaPlayer.play();
 }
 
-void Song::checkChords(){
-  // for (int i=0;i<CHORD_BUFFER_SIZE;i++){
-    // qDebug() << "BEGIN CHECKCHORD SEQUENCE";
-    // chordBuffer[i]->print();
-  if (currentChord+1 >= currentDifficulty->size()) return;
-  if (qint64(currentDifficulty->at(currentChord).getSpawnTime()) <= mediaPlayer.position()){
-    currentDifficulty->at(currentChord).print();
-    qDebug() << "Spawning chord" << currentChord
-             << "at" << mediaPlayer.position() << "ms";
-    currentDifficulty->at(currentChord++).spawn(scene);
-    // chordBuffer[i] = &currentDifficulty->at(currentChord++);
+// Checks if a note is due to get spawns (is run every ms)
+void Song::spawnHandler(){
+  // If the last chord to spawn has already been reached, cancel this method
+  if (currentSpawnChord+1 >= currentDifficulty->size()) return;
+  if (qint64(currentDifficulty->at(currentSpawnChord).getSpawnTime()) <= mediaPlayer.position()){
+    // currentDifficulty->at(currentSpawnChord).print();
+    // qDebug() << "Spawning chord" << currentSpawnChord
+             // << "at" << mediaPlayer.position() << "ms";
+    currentDifficulty->at(currentSpawnChord++).spawn(scene);
   }
-  // }
 }
+
+// Updates the scoring system for each note
+void Song::scoreHandler(){
+  // If the last chord to hit has already been reached, cancel this method
+  if (currentScoreChord+1 >= currentDifficulty->size()) return;
+  if (qint64(currentDifficulty->at(currentScoreChord).getRushStart()) <= mediaPlayer.position()){
+    longNote = (currentDifficulty->at(currentScoreChord).getDuration() !=0 );
+    qDebug() << "Now at note" << currentScoreChord << (longNote? "Long":"Short");
+    currentScoreChord++;
+  }
+}
+
+// void Song::tabUpdater(std::array<bool,5> noteStates, int mod){
+  // QString tmp = "{";
+  // for (int i=0;i<5;i++){
+    // scoreTab[i] += noteStates[i] * mod;
+    // tmp += QString::number(scoreTab[i])+",";
+  // };
+  // tmp[tmp.size()-1] = '}';
+  // qDebug() << tmp;
+// }
 
 void Song::setSpawnTimings(int difficulty){
   if (scene==NULL) {
@@ -344,7 +339,7 @@ void Song::setSpawnTimings(int difficulty){
     &easy, &medium, &hard, &expert
   };
   std::vector<Chord>* chords = allDiffs[difficulty];
-  for (int i=0;i<chords->size();i++){
+  for (uint i=0;i<chords->size();i++){
     chords->at(i).setSpawnTime( chords->at(i).getStart()-travelTime );
   }
 

@@ -17,8 +17,6 @@
 #define DIFFICULTY_HARD   2
 #define DIFFICULTY_EXPERT 3
 
-#define CHORD_BUFFER_SIZE 10
-
 class Song:public QObject {
   Q_OBJECT
   private:
@@ -41,12 +39,16 @@ class Song:public QObject {
     std::vector<Timestamp> timestamps;
     void consolidate(int difficulty);
     GameScene* scene;
-    Chord* chordBuffer[CHORD_BUFFER_SIZE];
     QTimer* clock;
-    int currentChord;
+    uint currentSpawnChord;
+    uint currentScoreChord;
+    bool longNote;
     std::vector<Chord>* currentDifficulty;
-    void checkChords();
+    void spawnHandler();
+    void scoreHandler();
+    void tabUpdater(std::array<bool,5> noteStates,int mod);
     void parseInfo();
+    // std::array<int,5> scoreTab;
   public:
     std::vector<Chord> easy;
     std::vector<Chord> medium;

@@ -17,8 +17,8 @@
 #define MS_PER_FRAME 1000/REFRESH_RATE
 
 // Tolerances for pressing notes too slowly/quicly
-#define TOLERANCE_RUSHING  -200 // ms (1/5th of a second)
-#define TOLERANCE_DRAGGING  200 // ms (1/5th of a second)
+#define TOLERANCE_RUSHING   100 // ms (1/5th of a second)
+#define TOLERANCE_DRAGGING  100 // ms (1/5th of a second)
 
 // Scoring system // XXX: subject to change, only there as an example
 #define SCORE_GOOD_NOTE     75
