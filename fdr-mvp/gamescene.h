@@ -5,6 +5,9 @@
 
 #include "fret.h"
 #include "leftbar.h"
+#include "rightbar.h"
+
+class Song;
 
 // This is the container for everything that happens in the game area.
 // Upon initialization, it places frets at the correct location.
@@ -18,11 +21,15 @@ class GameScene : public QGraphicsScene {
     void recolor(bool states[5]); // Updates all fret colors (pressed/released)
     Fret* getFret(int index);
     LeftBar* getLeftBar();
+    RightBar* getRightBar();
+    void setSong(Song* song);
   private:
     LeftBar* leftbar;
+    RightBar* rightbar;
     Fret* frets[5]; // At the bottom of the screen
     double fretMarginX; // defined using ui.h macro
     double fretMarginY; // defined using ui.h macro
+    Song* song;
   protected:
     // The keyboard is currently used to test
     // method behaviors

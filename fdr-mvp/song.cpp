@@ -21,9 +21,9 @@ Song::Song(QString chartfile): chartfile(chartfile) {
   mediaPlayer.setNotifyInterval(1);
   parseInfo();
   printInfo();
-};
+}
 
-Song::~Song(){};
+Song::~Song(){}
 
 void Song::parseInfo(){
   std::string stdAudio = chartfile.toStdString();
@@ -282,6 +282,7 @@ void Song::play(int difficulty){
   qDebug() << "INITIATING SONG:";
   currentSpawnChord=0;
   currentScoreChord=0;
+  highscore=0;
   // for (int i=0;i<5;i++) scoreTab[i] =0;
   // Initialise the checking timer
   clock = new QTimer(this);
@@ -298,9 +299,6 @@ void Song::spawnHandler(){
   // If the last chord to spawn has already been reached, cancel this method
   if (currentSpawnChord+1 >= currentDifficulty->size()) return;
   if (qint64(currentDifficulty->at(currentSpawnChord).getSpawnTime()) <= mediaPlayer.position()){
-    // currentDifficulty->at(currentSpawnChord).print();
-    // qDebug() << "Spawning chord" << currentSpawnChord
-             // << "at" << mediaPlayer.position() << "ms";
     currentDifficulty->at(currentSpawnChord++).spawn(scene);
   }
 }
@@ -311,20 +309,9 @@ void Song::scoreHandler(){
   if (currentScoreChord+1 >= currentDifficulty->size()) return;
   if (qint64(currentDifficulty->at(currentScoreChord).getRushStart()) <= mediaPlayer.position()){
     longNote = (currentDifficulty->at(currentScoreChord).getDuration() !=0 );
-    qDebug() << "Now at note" << currentScoreChord << (longNote? "Long":"Short");
     currentScoreChord++;
   }
 }
-
-// void Song::tabUpdater(std::array<bool,5> noteStates, int mod){
-  // QString tmp = "{";
-  // for (int i=0;i<5;i++){
-    // scoreTab[i] += noteStates[i] * mod;
-    // tmp += QString::number(scoreTab[i])+",";
-  // };
-  // tmp[tmp.size()-1] = '}';
-  // qDebug() << tmp;
-// }
 
 void Song::setSpawnTimings(int difficulty){
   if (scene==NULL) {
@@ -355,4 +342,23 @@ std::vector<Chord>* Song::getChords(int difficulty){
 
 void Song::setScene(GameScene* newScene){
   scene = newScene;
+  scene->setSong(this);
+}
+
+void Song::strum(){
+  // Check if the strum is played too late:
+  int chordScore=0;
+  if (mediaPlayer.position() > currentDifficulty->at(currentScoreChord).getStart()+TOLERANCE_DRAGGING){
+    chordScore = SCORE_LATE_NOTE;
+  } else {
+    chordScore = SCORE_GOOD_NOTE;
+    std::array<bool,5> currentChordBools = currentDifficulty->at(currentScoreChord).getNotes();
+    for (int i=0;i<5;i++){
+      if (fretStates[i] != currentChordBools[i]){
+        chordScore = SCORE_WRONG_NOTE;
+      }
+    }
+  }
+  highscore += chordScore;
+  scene->getRightBar()->setScore(highscore);
 }

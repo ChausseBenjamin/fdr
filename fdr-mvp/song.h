@@ -43,6 +43,7 @@ class Song:public QObject {
     uint currentSpawnChord;
     uint currentScoreChord;
     bool longNote;
+    int highscore;
     std::vector<Chord>* currentDifficulty;
     void spawnHandler();
     void scoreHandler();
@@ -69,6 +70,7 @@ class Song:public QObject {
     std::vector<Chord>* getChords(int difficulty);
     void play(int difficulty=DIFFICULTY_EXPERT);
     void setScene(GameScene* newScene);
+    void strum();
 };
 
 #endif // SONG_H

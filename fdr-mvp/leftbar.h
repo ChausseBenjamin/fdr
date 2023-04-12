@@ -2,7 +2,7 @@
 #define LEFTBAR_H
 
 #include <QGraphicsTextItem>
-#include <QGraphicsPixmapItem>>
+#include <QGraphicsPixmapItem>
 #include <QGraphicsScene>
 
 

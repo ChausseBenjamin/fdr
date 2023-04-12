@@ -7,6 +7,7 @@
 #include <QDebug>
 #include "gamescene.h"
 #include "ui.h"
+#include "song.h"
 #include "common.h"
 #include "chord.h"
 
@@ -15,14 +16,15 @@ GameScene::GameScene(QObject *parent)
   // Make sure ojects are correctly positionned once mounted to a QGraphicsView
   connect(this, &QGraphicsScene::sceneRectChanged,
           this, &GameScene::onMasterChanged);
-  // Add the leftbar to the scene
-  leftbar = new LeftBar(this);
   // Create the frets and add them to the scene
   for (int i=0; i<5; i++){
     frets[i] = new Fret(i);
     addItem(frets[i]);
     // NOTE: fret positions/coordinates are set once a QGraphicsView is mounted
   }
+  // Add the leftbar to the scene
+  leftbar = new LeftBar(this);
+  rightbar = new RightBar(this);
 }
 
 GameScene::~GameScene(){
@@ -31,6 +33,8 @@ GameScene::~GameScene(){
   for (int i=0; i<5; i++){
     delete frets[i];
   }
+  delete leftbar;
+  delete rightbar;
 }
 
 Fret* GameScene::getFret(int index){
@@ -39,6 +43,10 @@ Fret* GameScene::getFret(int index){
 
 LeftBar* GameScene::getLeftBar(){
   return leftbar;
+}
+
+RightBar* GameScene::getRightBar(){
+  return rightbar;
 }
 
 // Sets the color of the different fret buttons according to their
@@ -69,6 +77,7 @@ void GameScene::onMasterChanged(const QRectF& rect){
   for (int i=0; i<5; i++){
       frets[i]->setPos(xPos[i],gameH-fretH-FRET_MARGIN_Y);
   }
+  rightbar->place();
   // Create a cute little background gradient
   // diagonal: from top-right to bottom-left
   QLinearGradient gradient(gameW, 0, 0, gameH);
@@ -127,9 +136,13 @@ void GameScene::keyPressEvent(QKeyEvent *event){
       chord->spawn(this);
       break;
     }
-    case Qt::Key_Return : { // Spawn a short chord
-      Chord* chord = new Chord(0,0,fretStates);
-      chord->spawn(this);
+    // case Qt::Key_Return : { // Spawn a short chord
+      // Chord* chord = new Chord(0,0,fretStates);
+      // chord->spawn(this);
+      // break;
+    // }
+    case Qt::Key_Return : { // Emulates strumming
+      song->strum();
       break;
     }
   }
@@ -166,3 +179,6 @@ void GameScene::keyReleaseEvent(QKeyEvent *event){
   }
 }
 
+void GameScene::setSong(Song* song){
+  this->song = song;
+}

@@ -22,8 +22,8 @@
 
 // Scoring system // XXX: subject to change, only there as an example
 #define SCORE_GOOD_NOTE     75
-#define SCORE_WRONG_NOTE    25
-#define SCORE_NO_NOTE      -25 // no notes played by the player
+#define SCORE_WRONG_NOTE   -25
+#define SCORE_LATE_NOTE    -25 // no notes played by the player
 #define SCORE_SURPLUS_NOTE -50 // note played when none required
 
 // Last recorded state of all the frets

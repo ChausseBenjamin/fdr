@@ -36,19 +36,20 @@ LeftBar::LeftBar(QGraphicsScene* scene) {
   author->setFont(QFont("Arial", 14));
   year->setDefaultTextColor(TEXT_COLOR_DISCRETE);
   year->setFont(QFont("Arial", 14));
-  // duration->setDefaultTextColor(TEXT_COLOR_SECONDARY);
+  duration->setDefaultTextColor(TEXT_COLOR_SECONDARY);
   charter->setDefaultTextColor(TEXT_COLOR_SECONDARY);
+  difficulty->setFont(QFont("Arial", 24));
   difficulty->setDefaultTextColor(TEXT_COLOR_SECONDARY);
   // Used for iterating positionning and adding to scene:
-  QGraphicsTextItem* elements[6] ={
-    title,difficulty,album,author,year,charter,
+  QGraphicsTextItem* elements[] ={
+    title,difficulty,album,author,year,charter,duration
   };
   // Set the position of the text
   const int x = TEXT_SIDE_PADDING;
   int y = TEXT_TOP_PADDING;
   title->setPos(x,y);
   y += title->boundingRect().height() + TEXT_MARGIN_Y;
-  for (int i=1;i<6;i++) {
+  for (int i=1;i<7;i++) {
     elements[i]->setPos(x,y);
     y += elements[i]->boundingRect().height() + TEXT_MARGIN_Y;
   }
@@ -56,9 +57,20 @@ LeftBar::LeftBar(QGraphicsScene* scene) {
   for (int i=0; i<6; i++) scene->addItem(elements[i]);
 
   // albumArt->setPos(TEXT_SIDE_PADDING, scene->height() - albumArt->pixmap().height() - TEXT_TOP_PADDING);
-  scene->addItem(albumArt);
+  // scene->addItem(albumArt);
+}
 
-
+LeftBar::~LeftBar(){
+  // TEXT ELEMENTS DELETION
+  QGraphicsTextItem* elements[7] = {
+    title,    album,      author, year,
+    duration, difficulty, charter
+  };
+  for (int i=0;i<7;i++){
+    if (elements[i] != NULL) delete elements[i];
+  }
+  // DELETING GRAPHICS:
+  if (albumArt != NULL) delete albumArt;
 }
 
 void LeftBar::setTitle(const QString text){
@@ -101,11 +113,11 @@ void LeftBar::setDifficulty(int difficulty){
   this->difficulty->setGraphicsEffect(shadowEffect);
 }
 
-void LeftBar::setAlbumArt(const QString chartfile){
+// void LeftBar::setAlbumArt(const QString chartfile){
   // std::string audioPath = chartfile.toStdString();
   // std:size_t lastSlash = audioPath.find_last_of("/");
   // audioPath = audioPath.substr(0,lastSlash+1)+"album.png";
   // QPixmap pixmap(QString::fromStdString(audioPath));
   // pixmap = pixmap.scaledToHeight(250);
   // albumArt->setPixmap(pixmap);
-}
+// }
