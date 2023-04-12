@@ -22,10 +22,13 @@ class Chord:public QObject {
     void spawn(GameScene* scene) const; // Draw the notes and launch them
     void merge(Chord* chord);
     void print();
+    int getRushStart();
     int getStart();
     int getEnd();
+    int getDuration();
     int getSpawnTime() const;
     void setSpawnTime(int ms);
+    std::array<bool,5> getNotes();
   public slots:
     void despawn() const; // Delete the chord once offscreen
   private:

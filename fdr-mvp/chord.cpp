@@ -10,7 +10,7 @@
 
 Chord::Chord(int start, int duration, bool toPlay[5]):
   duration(duration), start(start), end(start+duration),
-  rushStart(start+TOLERANCE_RUSHING),
+  rushStart(start-TOLERANCE_RUSHING),
   dragStart(start+TOLERANCE_DRAGGING),
   rushRelease( (duration!=0)? rushStart+duration : 0 ),
   dragRelease((duration!=0)? dragStart+duration : 0 ),
@@ -30,7 +30,7 @@ Chord::Chord(int start, int duration, bool toPlay[5]):
 
 Chord::Chord(int fret, int start, int end):
   duration((end==0)?0:end-start),start(start),end(end),
-  rushStart(start+TOLERANCE_RUSHING),
+  rushStart(start-TOLERANCE_RUSHING),
   dragStart(start+TOLERANCE_DRAGGING),
   rushRelease((duration!=0)? rushStart+duration : 0 ),
   dragRelease((duration!=0)? dragStart+duration : 0 ),
@@ -107,28 +107,24 @@ void Chord::setSpawnTime(int ms){
 // Called when animation finishes
 // Destroys the chord (and it's notes)
 void Chord::despawn() const{
-  qDebug() << "DELETING";
   for (int i=0;i<noteNB;i++){
     delete notes[i];
   }
-  // delete this;
 }
 
 void Chord::merge(Chord* chord){
   for (int i=0;i<5;i++){
     if (chord->notes[i] != NULL){
       notes[noteNB++] = chord->notes[i];
-      // noteNB++;
     }
   }
 }
 
 void Chord::print(){
-  std::string states = "{";
-  for (int i=0;i<5;i++){
-    states += (notes[i]==NULL)? "_":"X";
+  std::string states = "{_____}";
+  for (int i=0;i<noteNB;i++){
+    states[notes[i]->getFret()+1] = 'X';
   }
-  states += "}";
   qDebug() << QString::fromStdString(states)
            << " NoteNB:" << noteNB
            << " Start:" << start
@@ -141,6 +137,13 @@ int Chord::getStart(){
   return start;
 }
 
+int Chord::getRushStart(){
+  return rushStart;
+}
+
+int Chord::getDuration(){
+  return duration;
+}
 
 int Chord::getEnd(){
   return end;
@@ -148,6 +151,14 @@ int Chord::getEnd(){
 
 int Chord::getSpawnTime() const{
   return spawnTime;
+}
+
+std::array<bool,5> Chord::getNotes(){
+  std::array<bool,5> noteStates = {false,false,false,false,false};
+  for (int i=0;i<noteNB;i++){
+    noteStates[notes[i]->getFret()] = true;
+  }
+  return noteStates;
 }
 
 Chord& Chord::operator=(const Chord& other) {

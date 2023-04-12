@@ -52,8 +52,9 @@ int main(int argc, char *argv[]) {
     for (int j=0;j<4;j++){
     };
   };
-  int wantedDiff = DIFFICULTY_EXPERT;
-  int wantedSong = 5;
+  int wantedDiff = DIFFICULTY_EASY;
+  int wantedSong = 0;
+  repertoire[wantedSong]->parseSync();
   repertoire[wantedSong]->setScene(scene);
   repertoire[wantedSong]->play(wantedDiff);
 

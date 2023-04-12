@@ -15,6 +15,7 @@ SOURCES += \
     gamescene.cpp \
     leftbar.cpp \
     note.cpp \
+    rightbar.cpp \
     song.cpp \
     timestamp.cpp \
     ui.cpp \
@@ -27,6 +28,7 @@ HEADERS += \
     gamescene.h \
     leftbar.h \
     note.h \
+    rightbar.h \
     song.h \
     timestamp.h \
     ui.h
