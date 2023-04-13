@@ -43,7 +43,7 @@ DifficultyMenu::DifficultyMenu(QGraphicsView* view, Song* song, QObject* parent)
 
 DifficultyMenu::~DifficultyMenu(){
   if (title != NULL) delete title;
-  for (int i=0;i++;i<5){
+  for (int i=0; i < 5;i++){
     if (boutons[i] != NULL) delete boutons[i];
   }
 }
@@ -68,8 +68,9 @@ void DifficultyMenu::select(){
   // If the back button is selected:
   if (boutonActuel==4){
     view->setScene(new SongMenu(view));
+    delete this;
   } else {
-    GameScene* game = new GameScene();
+    GameScene* game = new GameScene(view);
     game->setSceneRect(view->rect());
     song->setScene(game);
     song->parseSync();

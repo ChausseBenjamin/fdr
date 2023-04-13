@@ -16,13 +16,14 @@ class Song;
 class GameScene : public QGraphicsScene {
   Q_OBJECT
   public:
-    explicit GameScene(QObject *parent = nullptr);
+    explicit GameScene(QGraphicsView* view, QObject *parent = nullptr);
     ~GameScene();
     void recolor(bool states[5]); // Updates all fret colors (pressed/released)
     Fret* getFret(int index);
     LeftBar* getLeftBar();
     RightBar* getRightBar();
     void setSong(Song* song);
+    QGraphicsView* getView();
   private:
     LeftBar* leftbar;
     RightBar* rightbar;
@@ -30,6 +31,7 @@ class GameScene : public QGraphicsScene {
     double fretMarginX; // defined using ui.h macro
     double fretMarginY; // defined using ui.h macro
     Song* song;
+    QGraphicsView* view;
   protected:
     // The keyboard is currently used to test
     // method behaviors

@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <regex>
 #include <QMediaPlayer>
+#include <QGraphicsView>
 #include <QObject>
 #include <QThread>
 
@@ -12,25 +13,29 @@
 #include "leftbar.h"
 #include "common.h"
 #include "timestamp.h"
+#include "endmenu.h"
 
 Song::Song(QString chartfile): chartfile(chartfile) {
   for (int i=0;i<4;i++){
     availableDifficulty[i] = false;
   }
   scene = NULL;
-  mediaPlayer.setNotifyInterval(1);
+  // mediaPlayer->setNotifyInterval(1);
   parseInfo();
   printInfo();
 }
 
-Song::~Song(){}
+Song::~Song(){
+    if (mediaPlayer != NULL) delete mediaPlayer;
+}
 
 void Song::parseInfo(){
   std::string stdAudio = chartfile.toStdString();
-  std::size_t lastSlash = stdAudio.find_last_of("/");
+  std::size_t lastSlash = stdAudio.find_last_of("\\");
   stdAudio = stdAudio.substr(0,lastSlash+1)+"song.wav";
   audiofile = QString::fromStdString(stdAudio);
-  mediaPlayer.setMedia(QUrl::fromLocalFile(audiofile));
+  mediaPlayer = new QMediaPlayer();
+  mediaPlayer->setMedia(QUrl::fromLocalFile(audiofile));
   std::string tokens[5] = {
     "Name", "Artist", "Album",
     "Year", "Charter"
@@ -269,7 +274,7 @@ void Song::play(int difficulty){
   leftbar->setAlbum(album);
   leftbar->setAuthor(artist);
   // leftbar->setYear(year);
-  // leftbar->setYear(mediaPlayer.LoadedState());
+  // leftbar->setYear(mediaPlayer->LoadedState());
   leftbar->setDifficulty(difficulty);
   // Select the correct difficulty
   std::vector<Chord>* allDiff[4] = {
@@ -288,17 +293,21 @@ void Song::play(int difficulty){
   clock = new QTimer(this);
   connect(clock, &QTimer::timeout,this,&Song::spawnHandler);
   connect(clock, &QTimer::timeout,this,&Song::scoreHandler);
+  connect(mediaPlayer, 
+      &QMediaPlayer::mediaStatusChanged,
+      this,
+      &Song::handleMediaStatusChanged);
   clock->start(1);
-  mediaPlayer.setVolume(50);
-  leftbar->setDuration(mediaPlayer.duration());
-  mediaPlayer.play();
+  mediaPlayer->setVolume(50);
+  leftbar->setDuration(mediaPlayer->duration());
+  mediaPlayer->play();
 }
 
 // Checks if a note is due to get spawns (is run every ms)
 void Song::spawnHandler(){
   // If the last chord to spawn has already been reached, cancel this method
   if (currentSpawnChord+1 >= currentDifficulty->size()) return;
-  if (qint64(currentDifficulty->at(currentSpawnChord).getSpawnTime()) <= mediaPlayer.position()){
+  if (qint64(currentDifficulty->at(currentSpawnChord).getSpawnTime()) <= mediaPlayer->position()){
     currentDifficulty->at(currentSpawnChord++).spawn(scene);
   }
 }
@@ -307,7 +316,7 @@ void Song::spawnHandler(){
 void Song::scoreHandler(){
   // If the last chord to hit has already been reached, cancel this method
   if (currentScoreChord+1 >= currentDifficulty->size()) return;
-  if (qint64(currentDifficulty->at(currentScoreChord).getRushStart()) < mediaPlayer.position()){
+  if (qint64(currentDifficulty->at(currentScoreChord).getRushStart()) < mediaPlayer->position()){
     longNote = (currentDifficulty->at(currentScoreChord).getDuration() !=0 );
     currentScoreChord++;
   }
@@ -347,7 +356,7 @@ void Song::setScene(GameScene* newScene){
 
 void Song::strum(){
   int chordScore=0;
-  qint64 currentTime = mediaPlayer.position();
+  qint64 currentTime = mediaPlayer->position();
   Chord* currentChord = &(currentDifficulty->at(currentScoreChord));
   std::array<bool,5> currentChordBools = currentChord->getNotes();
 
@@ -414,4 +423,17 @@ return year;
 
 QString Song::getCharter(){
 return charter;
+}
+
+QString Song::getScore() {
+    return QString::number(highscore);
+}
+
+void Song::handleMediaStatusChanged(QMediaPlayer::MediaStatus status) {
+    if (status == QMediaPlayer::EndOfMedia) {
+        qDebug() << "Reached end of song";
+        QGraphicsView* view = scene->getView();
+        view->setScene(new EndMenu(view, this));
+        delete scene;
+    }
 }

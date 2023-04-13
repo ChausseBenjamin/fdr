@@ -11,8 +11,9 @@
 #include "common.h"
 #include "chord.h"
 
-GameScene::GameScene(QObject *parent)
+GameScene::GameScene(QGraphicsView* view, QObject *parent)
   : QGraphicsScene{parent} {
+  this->view = view;
   // Make sure ojects are correctly positionned once mounted to a QGraphicsView
   connect(this, &QGraphicsScene::sceneRectChanged,
           this, &GameScene::onMasterChanged);
@@ -131,7 +132,7 @@ void GameScene::keyPressEvent(QKeyEvent *event){
       recolor(fretStates);
       break;
     }
-    case Qt::Key_Backslash : { // Spawn a long chord (800ms)
+    case Qt::Key_W : { // Spawn a long chord (800ms)
       Chord* chord = new Chord(0,800,fretStates);
       chord->spawn(this);
       break;
@@ -181,4 +182,8 @@ void GameScene::keyReleaseEvent(QKeyEvent *event){
 
 void GameScene::setSong(Song* song){
   this->song = song;
+}
+
+QGraphicsView* GameScene::getView(){
+    return view;
 }
