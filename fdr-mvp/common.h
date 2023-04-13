@@ -1,10 +1,17 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#include "ui.h"
+#include <QString>
 
 // This file contains definitions and variables that are used throughout
 // multiple classes. It's focus is mainly on the backend.
+
+// IO for file paths are configured in the associated cpp:
+#define SONG_COUNT 10 // How many songs the game can handle
+extern QString sourcePath;
+extern QString songPath;
+extern QString chartfileName;
+extern const QString filePaths[SONG_COUNT];
 
 // Information about motion:
 // This is the only place where time is measured in seconds
@@ -17,14 +24,14 @@
 #define MS_PER_FRAME 1000/REFRESH_RATE
 
 // Tolerances for pressing notes too slowly/quicly
-#define TOLERANCE_RUSHING   100 // ms (1/5th of a second)
-#define TOLERANCE_DRAGGING  100 // ms (1/5th of a second)
+#define TOLERANCE_RUSHING   200 // ms (1/5th of a second)
+#define TOLERANCE_DRAGGING  200 // ms (1/5th of a second)
 
 // Scoring system // XXX: subject to change, only there as an example
 #define SCORE_GOOD_NOTE     75
-#define SCORE_WRONG_NOTE   -25
+#define SCORE_WRONG_NOTE   -50
 #define SCORE_LATE_NOTE    -25 // no notes played by the player
-#define SCORE_SURPLUS_NOTE -50 // note played when none required
+#define SCORE_SURPLUS_NOTE -75 // note played when none required
 
 // Last recorded state of all the frets
 // TODO: perhaps put this in a separate class only editable by the remote

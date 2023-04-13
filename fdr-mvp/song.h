@@ -71,6 +71,11 @@ class Song:public QObject {
     void play(int difficulty=DIFFICULTY_EXPERT);
     void setScene(GameScene* newScene);
     void strum();
+    QString getTitle();
+    QString getArtist();
+    QString getAlbum();
+    QString getYear();
+    QString getCharter();
 };
 
 #endif // SONG_H

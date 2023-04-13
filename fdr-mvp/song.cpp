@@ -307,7 +307,7 @@ void Song::spawnHandler(){
 void Song::scoreHandler(){
   // If the last chord to hit has already been reached, cancel this method
   if (currentScoreChord+1 >= currentDifficulty->size()) return;
-  if (qint64(currentDifficulty->at(currentScoreChord).getRushStart()) <= mediaPlayer.position()){
+  if (qint64(currentDifficulty->at(currentScoreChord).getRushStart()) < mediaPlayer.position()){
     longNote = (currentDifficulty->at(currentScoreChord).getDuration() !=0 );
     currentScoreChord++;
   }
@@ -346,19 +346,72 @@ void Song::setScene(GameScene* newScene){
 }
 
 void Song::strum(){
-  // Check if the strum is played too late:
   int chordScore=0;
-  if (mediaPlayer.position() > currentDifficulty->at(currentScoreChord).getStart()+TOLERANCE_DRAGGING){
+  qint64 currentTime = mediaPlayer.position();
+  Chord* currentChord = &(currentDifficulty->at(currentScoreChord));
+  std::array<bool,5> currentChordBools = currentChord->getNotes();
+
+  QString tmp = "At "+QString::number(currentTime)+", got {";
+  for (int i=0;i<5;i++){
+    tmp += (fretStates[i])?'X':' ';
+  }
+  tmp += "} for chord "+QString::number(currentScoreChord)+" {";
+  for (int i=0;i<5;i++){
+    tmp += (currentChordBools[i])?'X':' ';
+  }
+  tmp += "} which ends at "+QString::number(currentChord->getStart()+TOLERANCE_DRAGGING);
+  // Check if the strum is played too late:
+  if (currentTime > currentChord->getStart()+TOLERANCE_DRAGGING){
     chordScore = SCORE_LATE_NOTE;
   } else {
     chordScore = SCORE_GOOD_NOTE;
-    std::array<bool,5> currentChordBools = currentDifficulty->at(currentScoreChord).getNotes();
+    // std::array<bool,5> currentChordBools = currentChord->getNotes();
+    // QString tmp = "Chord:" QString::number(currentScoreChord)
+    // qDebug()
     for (int i=0;i<5;i++){
       if (fretStates[i] != currentChordBools[i]){
         chordScore = SCORE_WRONG_NOTE;
       }
     }
   }
+  switch (chordScore){
+    case SCORE_LATE_NOTE:
+      tmp += "-> LATE NOTE";
+      break;
+    case SCORE_WRONG_NOTE:
+      tmp += "-> WRONG NOTE";
+      break;
+    case SCORE_GOOD_NOTE:
+      tmp += "-> GOOD NOTE";
+      break;
+    case SCORE_SURPLUS_NOTE:
+      tmp += "-> SURPLUS_NOTE";
+      break;
+    default:
+      break;
+  };
+  qDebug() << tmp;
   highscore += chordScore;
   scene->getRightBar()->setScore(highscore);
+}
+
+QString Song::getTitle(){
+  qDebug() << title+" for path "+chartfile;
+  return title;
+}
+
+QString Song::getArtist(){
+return artist;
+}
+
+QString Song::getAlbum(){
+return album;
+}
+
+QString Song::getYear(){
+return year;
+}
+
+QString Song::getCharter(){
+return charter;
 }

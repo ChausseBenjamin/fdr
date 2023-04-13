@@ -11,12 +11,17 @@ CONFIG += c++17
 SOURCES += \
     chord.cpp \
     common.cpp \
+    difficultymenu.cpp \
     fret.cpp \
     gamescene.cpp \
+    infomenu.cpp \
     leftbar.cpp \
+    mainmenu.cpp \
     note.cpp \
     rightbar.cpp \
+    rulesmenu.cpp \
     song.cpp \
+    songmenu.cpp \
     timestamp.cpp \
     ui.cpp \
     main.cpp
@@ -24,12 +29,17 @@ SOURCES += \
 HEADERS += \
     chord.h \
     common.h \
+    difficultymenu.h \
     fret.h \
     gamescene.h \
+    infomenu.h \
     leftbar.h \
+    mainmenu.h \
     note.h \
     rightbar.h \
+    rulesmenu.h \
     song.h \
+    songmenu.h \
     timestamp.h \
     ui.h
 

@@ -28,6 +28,10 @@
 #define TEXT_COLOR_MAIN      QColor(242, 241, 240, 255)
 #define TEXT_COLOR_SECONDARY QColor(164, 160, 156, 255)
 #define TEXT_COLOR_DISCRETE  QColor(110, 100,  90, 255)
+
+// Text in the menus
+#define TEXT_COLOR_MENU          QColor(169,169,142)
+#define TEXT_COLOR_MENU_SELECTED QColor(200,200,69)
 // QFont       textFontMain;
 // QFont  textFontSecondary;
 // QFont   textFontDiscrete;

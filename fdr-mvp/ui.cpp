@@ -2,14 +2,14 @@
 #include "ui.h"
 
 // Color palette for frets
-QColor fretReleaseColor[5] = {
+QColor fretPressColor[5] = {
   QColor(144, 238, 144, 255), // Light Green
   QColor(255,  99,  71, 255), // Light Red
   QColor(255, 255, 153, 255), // Light Yellow
   QColor(135, 206, 235, 255), // Light Blue
   QColor(255, 200,  42, 255)  // Light Orange
 };
-QColor fretPressColor[5] = {
+QColor fretReleaseColor[5] = {
   QColor(  0, 100,   0, 255), // Green
   QColor(139,   0,   0, 255), // Red
   QColor(128, 128,   0, 255), // Yellow

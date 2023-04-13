@@ -1,7 +1,24 @@
 #include <QDebug>
 #include "common.h"
 
-// This is accessible to everyone but will mainly be altered by the remote
+#include "ui.h"
+
+QString sourcePath = "/home/master/Workspace/fdr";
+QString songPath = sourcePath+"/songs/";
+QString chartfileName = "notes.chart";
+const QString filePaths[SONG_COUNT] = {
+songPath+"Greta-Van-Fleet-Highway-Tune/"+chartfileName,
+songPath+"Joan-Jett-and-the-Blackhearts-I-Love-Rock-_N-Roll-(The-Arrows-Cover)/"+chartfileName,
+songPath+"Maynard-Ferguson-Birdland/"+chartfileName,
+songPath+"Maynard-Ferguson-Country-Road-(James-Taylor-Cover)/"+chartfileName,
+songPath+"Maynard-Ferguson-Theme-From-Shaft/"+chartfileName,
+songPath+"Owane-Rock-Is-Too-Heavy/"+chartfileName,
+songPath+"Santana-Oye-Como-Va-(Tito-Puente-Cover)/"+chartfileName,
+songPath+"Stevie-Wonder-Contusion/"+chartfileName,
+songPath+"Symphony-X-Eve-of-Seduction/"+chartfileName,
+songPath+"Victor-Wooten-and-Steve-Bailey-A-Chick-from-Corea-(Live)/"+chartfileName
+};
+
 bool fretStates[5] = {0};
 // This is accessible to everyone but as chords reach certain thresholds,
 // they will change these values.
