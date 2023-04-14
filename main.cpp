@@ -10,12 +10,15 @@
 /*------------------------------ Librairies ---------------------------------*/
 #include <Arduino.h>
 #include <ArduinoJson.h>
+#include <TimerOne.h>
 
 /*------------------------------ Constantes ---------------------------------*/
 
 #define BAUD 115200        // Frequence de transmission serielle
+//#define BAUD 9600 
 #define delayTime 1000
 #define JOY_FREEZE 50
+#define THRESHOLD_MUON 500
 
 /*---------------------------- Variables globales ---------------------------*/
 
@@ -59,6 +62,7 @@ int readPinAccX = A15;
 int readPinAccY = A14;
 int readPinAccZ = A13;
 int last3AccZ[3] = {300, 300, 300};
+int pinMuon = A0;
 
 
 int OutPinLed10 = 53;
@@ -126,10 +130,14 @@ void ledstate();
 void debouncing(int i, int &pin, bool &out);
 void shaking();
 int moyenneACC();
+bool muons();
 /*---------------------------- Fonctions "Main" -----------------------------*/
 
 void setup() {
   Serial.begin(BAUD);               // Initialisation de la communication serielle
+
+  //Timer1.initialize(1000); //Initialize timer with 10 millisecond period
+  //Timer1.attachInterrupt(printData);
 
   AccX = readPinAccX;
   AccY = readPinAccY;
@@ -148,7 +156,7 @@ void setup() {
   pinMode(readPinSD, INPUT);
   pinMode(readPinPotX, INPUT);
   pinMode(readPinPotY, INPUT);
-
+  pinMode(pinMuon, INPUT);
 
   digitalWrite(OutPinLed1,HIGH);
   pinMode(OutPinLed1,OUTPUT);    
@@ -180,7 +188,6 @@ void loop()
   {
     zero = true;
   }
-
   if(zero)
   {
     JoyDirOut = JoyDir;
@@ -190,7 +197,8 @@ void loop()
   Joystick();
   ledstate();
   shaking();
-  Muons = rand() % 100;
+  muons();
+  //Muons = rand() % 100;
 
 
   debouncing(Button0, readPinSD, outputBoutonSD);
@@ -210,8 +218,8 @@ void loop()
   
   if(shouldRead_)
   {
-    readMsg();
-    sendMsg();
+  readMsg();
+  sendMsg();
   }
 
   VPotX = analogRead(readPinPotX);
@@ -275,7 +283,6 @@ void shaking()
   {
     isShaking = true;
   }
-
   temp = AccY-LastAccY;
   if(temp < 0)
   {
@@ -285,7 +292,6 @@ void shaking()
   {
     isShaking = true;
   }
-
   temp = AccZ-LastAccZ;
   if(temp < 0)
   {
@@ -669,9 +675,10 @@ void sendMsg() {
   serializeJson(doc, Serial);
 
   // Envoie
-  Serial.println();
+  //Serial.println();
   shouldSend_ = false;
   //shouldRead_ = false;
+  Muons = 0; //remet le compte de muons a 0
 }
 
 /*---------------------------Definition de fonctions ------------------------
@@ -691,8 +698,8 @@ void readMsg(){
 
   // Si erreur dans le message
   if (error) {
-    Serial.print("deserialize() failed: ");
-    Serial.println(error.c_str());
+    //Serial.print("deserialize() failed: ");
+    //Serial.println(error.c_str());
     return;
   }
   
@@ -720,20 +727,33 @@ int moyenneACC()
     // reset the debouncing timer
     lastDebounceTime = millis();
   }
-
   if ((millis() - lastDebounceTime) > debounceDelay) 
   {
     //Serial.println("b1");
     if (reading != state) 
     {
       state = reading;
-
       if (state == HIGH) 
       {
         VSD = 1;
       }
     }
   }
-
   last = reading;
 }*/
+
+bool muons()
+{
+  int Analog_muon = analogRead(A0);
+  //Serial.println(Analog_muon);
+  if (Analog_muon > THRESHOLD_MUON)
+  {
+    Muons++;
+    //Serial.println("Depasse threshold");
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
