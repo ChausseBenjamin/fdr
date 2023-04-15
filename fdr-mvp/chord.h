@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QTimeLine>
+#include <array>
 
 #include "note.h"
 #include "gamescene.h"

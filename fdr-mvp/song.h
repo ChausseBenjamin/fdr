@@ -32,7 +32,7 @@ class Song:public QObject {
     int     resolution;
     int     offset;
     QString audiofile;
-    QMediaPlayer mediaPlayer;
+    QMediaPlayer* mediaPlayer;
     // Set of chords for different difficulties
     // 0:Easy, 1:Medium, 2:Hard, 3:Expert
     bool availableDifficulty[4];
@@ -47,6 +47,7 @@ class Song:public QObject {
     std::vector<Chord>* currentDifficulty;
     void spawnHandler();
     void scoreHandler();
+    void handleMediaStatusChanged(QMediaPlayer::MediaStatus);
     void tabUpdater(std::array<bool,5> noteStates,int mod);
     void parseInfo();
     // std::array<int,5> scoreTab;
@@ -77,8 +78,6 @@ class Song:public QObject {
     QString getYear();
     QString getCharter();
     QString getScore();
-  private slots:
-    void handleMediaStatusChanged(QMediaPlayer::MediaStatus status);
 };
 
 #endif // SONG_H

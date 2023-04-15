@@ -48,6 +48,7 @@ EndMenu::~EndMenu(){
   if (     title != NULL) delete title;
   if (      desc != NULL) delete desc;
   if (backButton != NULL) delete backButton;
+  if (      song != NULL) delete song;
 }
 
 void EndMenu::select(){

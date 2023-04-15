@@ -17,13 +17,14 @@ class Song;
 class GameScene : public QGraphicsScene {
   Q_OBJECT
   public:
-    explicit GameScene(QGraphicsView* view,QObject *parent = nullptr);
+    explicit GameScene(QGraphicsView* view, QObject *parent = nullptr);
     ~GameScene();
     void recolor(bool states[5]); // Updates all fret colors (pressed/released)
     Fret* getFret(int index);
     LeftBar* getLeftBar();
     RightBar* getRightBar();
     void setSong(Song* song);
+    QGraphicsView* getView();
   private:
     QGraphicsView* view;
     LeftBar* leftbar;

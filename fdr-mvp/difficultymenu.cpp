@@ -71,6 +71,7 @@ void DifficultyMenu::select(){
   // If the back button is selected:
   if (boutonActuel==4){
     view->setScene(new SongMenu(view));
+    delete this;
   } else {
     GameScene* game = new GameScene(view);
     game->setSceneRect(view->rect());
