@@ -2,6 +2,7 @@
 #define GAMESCENE_H
 
 #include <QGraphicsScene>
+#include <QGraphicsView>
 
 #include "fret.h"
 #include "leftbar.h"
@@ -16,7 +17,7 @@ class Song;
 class GameScene : public QGraphicsScene {
   Q_OBJECT
   public:
-    explicit GameScene(QObject *parent = nullptr);
+    explicit GameScene(QGraphicsView* view,QObject *parent = nullptr);
     ~GameScene();
     void recolor(bool states[5]); // Updates all fret colors (pressed/released)
     Fret* getFret(int index);
@@ -24,6 +25,7 @@ class GameScene : public QGraphicsScene {
     RightBar* getRightBar();
     void setSong(Song* song);
   private:
+    QGraphicsView* view;
     LeftBar* leftbar;
     RightBar* rightbar;
     Fret* frets[5]; // At the bottom of the screen

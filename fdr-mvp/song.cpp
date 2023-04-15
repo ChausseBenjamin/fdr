@@ -415,3 +415,13 @@ return year;
 QString Song::getCharter(){
 return charter;
 }
+
+QString Song::getScore(){
+return QString::number(highscore);
+}
+
+void Song::handleMediaStatusChanged(QMediaPlayer::MediaStatus status){
+  if (status == QMediaPlayer::EndOfMedia){
+      qDebug() << "Reached end of song";
+  }
+}

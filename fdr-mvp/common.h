@@ -2,6 +2,7 @@
 #define COMMON_H
 
 #include <QString>
+#include <QGraphicsScene>
 
 // This file contains definitions and variables that are used throughout
 // multiple classes. It's focus is mainly on the backend.
@@ -48,5 +49,7 @@ int pxToMs(int length);
 int countTrue(bool arr[], int size);
 // Calculates the number of nanoseconds that pass within one tick
 int nspt(const int nbpm, const int resolution);
+// Generates a background gradient automatically:
+void setBgGradient(QGraphicsScene* scene);
 
 #endif // COMMON_H

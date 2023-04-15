@@ -4,6 +4,7 @@
 #include "difficultymenu.h"
 #include "ui.h"
 #include "song.h"
+#include "common.h"
 
 #include <QColor>
 #include <QGraphicsTextItem>
@@ -12,6 +13,8 @@
 SongMenu::SongMenu(QGraphicsView* view, QObject* parent) {
   this->view = view;
   this->setSceneRect(view->rect());
+  // Set background
+  setBgGradient(this);
 
   // Configure the title:
   title = new QGraphicsTextItem();

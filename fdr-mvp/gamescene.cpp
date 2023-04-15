@@ -11,8 +11,10 @@
 #include "common.h"
 #include "chord.h"
 
-GameScene::GameScene(QObject *parent)
+GameScene::GameScene(QGraphicsView* view,QObject *parent)
   : QGraphicsScene{parent} {
+  this->view = view;
+  // this->setSceneRect(view->rect());
   // Make sure ojects are correctly positionned once mounted to a QGraphicsView
   connect(this, &QGraphicsScene::sceneRectChanged,
           this, &GameScene::onMasterChanged);
@@ -79,12 +81,7 @@ void GameScene::onMasterChanged(const QRectF& rect){
   }
   rightbar->place();
   // Create a cute little background gradient
-  // diagonal: from top-right to bottom-left
-  QLinearGradient gradient(gameW, 0, 0, gameH);
-  gradient.setColorAt(0, bgGradient[0]);
-  gradient.setColorAt(1, bgGradient[1]);
-  QBrush brush(gradient);
-  setBackgroundBrush(brush);
+  setBgGradient(this);
 }
 
 // Handles what happens when keyboard keys are pressed.

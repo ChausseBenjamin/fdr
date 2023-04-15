@@ -56,3 +56,13 @@ int nspt(const int nbpm, const int resolution){
   // resolution: number of ticks per beat
   return 60000000000 / (nbpm * resolution);
 }
+
+// Generates a background gradient automatically:
+void setBgGradient(QGraphicsScene* scene){
+  QLinearGradient gradient(scene->sceneRect().width(),0,
+                           0,scene->sceneRect().height());
+  gradient.setColorAt(0,bgGradient[0]);
+  gradient.setColorAt(1,bgGradient[1]);
+  QBrush brush(gradient);
+  scene->setBackgroundBrush(brush);
+}

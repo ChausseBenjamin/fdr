@@ -76,6 +76,9 @@ class Song:public QObject {
     QString getAlbum();
     QString getYear();
     QString getCharter();
+    QString getScore();
+  private slots:
+    void handleMediaStatusChanged(QMediaPlayer::MediaStatus status);
 };
 
 #endif // SONG_H

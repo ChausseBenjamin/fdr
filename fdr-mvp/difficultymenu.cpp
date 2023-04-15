@@ -7,12 +7,15 @@
 #include <QKeyEvent>
 
 #include "ui.h"
+#include "common.h"
 #include "song.h"
 
 DifficultyMenu::DifficultyMenu(QGraphicsView* view, Song* song, QObject* parent){
   this->view = view;
   this->song = song;
   this->setSceneRect(view->rect());
+  // Set the background gradient
+  setBgGradient(this);
   // Create the title
   title = new QGraphicsTextItem();
   title->setPlainText("Choix de la difficulté:");
@@ -43,7 +46,7 @@ DifficultyMenu::DifficultyMenu(QGraphicsView* view, Song* song, QObject* parent)
 
 DifficultyMenu::~DifficultyMenu(){
   if (title != NULL) delete title;
-  for (int i=0;i++;i<5){
+  for (int i=0;i<5;i++){
     if (boutons[i] != NULL) delete boutons[i];
   }
 }
@@ -69,7 +72,7 @@ void DifficultyMenu::select(){
   if (boutonActuel==4){
     view->setScene(new SongMenu(view));
   } else {
-    GameScene* game = new GameScene();
+    GameScene* game = new GameScene(view);
     game->setSceneRect(view->rect());
     song->setScene(game);
     song->parseSync();
@@ -84,7 +87,6 @@ void DifficultyMenu::draw(){
   for (int i=0;i<5;i++){
     boutons[i]->setDefaultTextColor( (i==boutonActuel)?TEXT_COLOR_MENU_SELECTED:TEXT_COLOR_MENU );
   }
-  // boutons[boutonActuel]->setDefaultTextColor(TEXT_COLOR_MENU_SELECTED);
 }
 
 

@@ -3,9 +3,9 @@
 #include "infomenu.h"
 #include "songmenu.h"
 #include "ui.h"
+#include "common.h"
 
 #include <QGraphicsTextItem>
-#include <QApplication>
 #include <QDebug>
 #include <QColor>
 #include <QFont>
@@ -14,6 +14,9 @@
 MainMenu::MainMenu(QGraphicsView* view, QObject* parent) {
   this->view = view;
   this->setSceneRect(view->rect());
+  // Set background
+  setBgGradient(this);
+  // Options for the menu:
   QString elements[] = {
     "Jouer", "Règlements", "Info", "Quitter"
   };
