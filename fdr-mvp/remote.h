@@ -24,7 +24,7 @@ class QTimer;
 class Remote :public QObject {
 	Q_OBJECT
 	public:
-		Remote(QGraphicsView* view, int baud=115200, std::string com="com3");
+		Remote(QGraphicsView* view, int baud=115200, std::string com="com7");
 		~Remote();
 	private:
 		QGraphicsView* view;
