@@ -334,7 +334,7 @@ void Song::scoreHandler(){
     longNote = (currentDifficulty->at(currentScoreChord).getDuration() !=0 );
     currentScoreChord++;
   }*/
-  if (qint64(currentDifficulty->at(currentScoreChord + 1).getRushStart()) < mediaPlayer.position()) {
+  if (qint64(currentDifficulty->at(currentScoreChord + 1).getRushStart()) < mediaPlayer->position()) {
       currentScoreChord++;
       //qDebug() << "CurrentChord Now : " + QString::number(currentScoreChord) + " at " + QString::number(mediaPlayer.position());
   }
