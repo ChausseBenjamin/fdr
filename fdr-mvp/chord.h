@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QTimeLine>
+#include <array>
 
 #include "note.h"
 #include "gamescene.h"
@@ -29,6 +30,7 @@ class Chord:public QObject {
     int getSpawnTime() const;
     void setSpawnTime(int ms);
     std::array<bool,5> getNotes();
+    Note* notes[5];  // Simultaneous notes in one chord
   public slots:
     void despawn() const; // Delete the chord once offscreen
   private:
@@ -42,7 +44,6 @@ class Chord:public QObject {
     int dragRelease; // Same as dragStart for note release (0 if single stroke)
     int spawnTime;   // When in the song the note should spawn
     int  noteNB;     // number of notes in the notes array
-    Note* notes[5];  // Simultaneous notes in one chord
 };
 
 #endif // CHORD_H

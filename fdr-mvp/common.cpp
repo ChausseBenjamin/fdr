@@ -3,12 +3,12 @@
 
 #include "ui.h"
 
-QString sourcePath = "/home/master/Workspace/fdr";
-QString songPath = sourcePath+"/songs/";
+QString sourcePath = "C:\\Users\\client\\Documents\\Uni\\S2\\projet\\ws_fdr_qt\\fdr";
+QString songPath = sourcePath+"\\songs\\";
 QString chartfileName = "notes.chart";
 const QString filePaths[SONG_COUNT] = {
-songPath+"Greta-Van-Fleet-Highway-Tune/"+chartfileName,
-songPath+"Joan-Jett-and-the-Blackhearts-I-Love-Rock-_N-Roll-(The-Arrows-Cover)/"+chartfileName,
+songPath+"Greta-Van-Fleet-Highway-Tune\\"+chartfileName,
+songPath+"Joan-Jett-and-the-Blackhearts-I-Love-Rock-_N-Roll-(The-Arrows-Cover)\\"+chartfileName,
 songPath+"Maynard-Ferguson-Birdland/"+chartfileName,
 songPath+"Maynard-Ferguson-Country-Road-(James-Taylor-Cover)/"+chartfileName,
 songPath+"Maynard-Ferguson-Theme-From-Shaft/"+chartfileName,

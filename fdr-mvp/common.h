@@ -24,14 +24,14 @@ extern const QString filePaths[SONG_COUNT];
 #define MS_PER_FRAME 1000/REFRESH_RATE
 
 // Tolerances for pressing notes too slowly/quicly
-#define TOLERANCE_RUSHING   200 // ms (1/5th of a second)
-#define TOLERANCE_DRAGGING  200 // ms (1/5th of a second)
+#define TOLERANCE_RUSHING   50 // ms (1/20th of a second)
+#define TOLERANCE_DRAGGING  50 // ms (1/20th of a second)
 
 // Scoring system // XXX: subject to change, only there as an example
-#define SCORE_GOOD_NOTE     75
-#define SCORE_WRONG_NOTE   -50
-#define SCORE_LATE_NOTE    -25 // no notes played by the player
-#define SCORE_SURPLUS_NOTE -75 // note played when none required
+#define SCORE_GOOD_NOTE     100
+//#define SCORE_WRONG_NOTE   -50
+//#define SCORE_LATE_NOTE    -25 // no notes played by the player
+#define SCORE_SURPLUS_NOTE -10 // note played when none required
 
 // Last recorded state of all the frets
 // TODO: perhaps put this in a separate class only editable by the remote

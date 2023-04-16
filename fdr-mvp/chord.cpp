@@ -94,7 +94,7 @@ void Chord::spawn(GameScene* scene) const{
           new QObject(), // Object linked to groupAnimation to allow self-desctruct
           [=]() {
             groupAnimation->deleteLater(); // free memory used by groupAnimation
-            despawn(); // delete the Chord alongside all of it's notes
+            //despawn(); // delete the Chord alongside all of it's notes
   });
   // Start the animation
   groupAnimation->start();
