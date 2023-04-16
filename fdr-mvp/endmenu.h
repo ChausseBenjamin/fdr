@@ -15,7 +15,10 @@ class EndMenu:public QGraphicsScene {
     QGraphicsView* view;
     Song* song;
     QGraphicsTextItem* title;
-    QGraphicsTextItem* desc;
+    QGraphicsTextItem* maxStreak;
+    QGraphicsTextItem* percentage;
+    QGraphicsTextItem* nbNotesReussies;
+    QGraphicsTextItem* score;
     QGraphicsTextItem* backButton;
     void nextElement();
     void prevElement();

@@ -17,6 +17,8 @@
 #define DIFFICULTY_HARD   2
 #define DIFFICULTY_EXPERT 3
 
+#define STREAK_TO_INCREASE_BARGRAPH 2
+
 class Song:public QObject {
   Q_OBJECT
   private:
@@ -44,6 +46,10 @@ class Song:public QObject {
     uint currentScoreChord;
     bool longNote;
     int highscore;
+    int currentStreak;
+    int maxStreak;
+    int bargraphState;
+    int correctlyPlayedNotes;
     std::vector<Chord>* currentDifficulty;
     void longCheck(QTimer* clock, uint chordIndex);
     void spawnHandler();
@@ -79,6 +85,9 @@ class Song:public QObject {
     QString getYear();
     QString getCharter();
     QString getScore();
+    QString getMaxStreak();
+    int getSongSize();
+    int getCorrectlyPlayedNotes();
 };
 
 #endif // SONG_H
