@@ -74,7 +74,7 @@ void InfoMenu::select(){
 
 void InfoMenu::keyPressEvent(QKeyEvent* event){
   switch (event->key()){
-    case Qt::Key_Q:
+    case Qt::Key_Return:
       select();
       break;
     default:

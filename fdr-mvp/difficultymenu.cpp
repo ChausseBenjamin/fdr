@@ -99,7 +99,7 @@ void DifficultyMenu::keyPressEvent(QKeyEvent* event){
     case Qt::Key_X:
       nextElement();
       break;
-    case Qt::Key_Q:
+    case Qt::Key_Return:
       select();
       break;
     default:

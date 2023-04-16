@@ -8,6 +8,7 @@
 
 #include "qscreen.h"
 #include "mainmenu.h"
+#include "remote.h"
 #include "gamescene.h"
 
 
@@ -32,6 +33,8 @@ int main(int argc, char *argv[]) {
   QList<QScreen*> screens = QGuiApplication::screens();
   // Create a view to put the scene inside
   QGraphicsView* view = new QGraphicsView();
+  // Mount a remote to this view
+  Remote* remote = new Remote(view);
   // Lock its dimensions (using the first screen from the list)
   view->setFixedSize(screens.first()->availableSize());
   // Make the game fullscreen
