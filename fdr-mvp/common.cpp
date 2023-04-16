@@ -9,14 +9,14 @@ QString chartfileName = "notes.chart";
 const QString filePaths[SONG_COUNT] = {
 songPath+"Greta-Van-Fleet-Highway-Tune\\"+chartfileName,
 songPath+"Joan-Jett-and-the-Blackhearts-I-Love-Rock-_N-Roll-(The-Arrows-Cover)\\"+chartfileName,
-songPath+"Maynard-Ferguson-Birdland/"+chartfileName,
-songPath+"Maynard-Ferguson-Country-Road-(James-Taylor-Cover)/"+chartfileName,
-songPath+"Maynard-Ferguson-Theme-From-Shaft/"+chartfileName,
-songPath+"Owane-Rock-Is-Too-Heavy/"+chartfileName,
-songPath+"Santana-Oye-Como-Va-(Tito-Puente-Cover)/"+chartfileName,
-songPath+"Stevie-Wonder-Contusion/"+chartfileName,
-songPath+"Symphony-X-Eve-of-Seduction/"+chartfileName,
-songPath+"Victor-Wooten-and-Steve-Bailey-A-Chick-from-Corea-(Live)/"+chartfileName
+songPath+"Maynard-Ferguson-Birdland\\"+chartfileName,
+songPath+"Maynard-Ferguson-Country-Road-(James-Taylor-Cover)\\"+chartfileName,
+songPath+"Maynard-Ferguson-Theme-From-Shaft\\"+chartfileName,
+songPath+"Owane-Rock-Is-Too-Heavy\\"+chartfileName,
+songPath+"Santana-Oye-Como-Va-(Tito-Puente-Cover)\\"+chartfileName,
+songPath+"Stevie-Wonder-Contusion\\"+chartfileName,
+songPath+"Symphony-X-Eve-of-Seduction\\"+chartfileName,
+songPath+"Victor-Wooten-and-Steve-Bailey-A-Chick-from-Corea-(Live)\\"+chartfileName
 };
 
 bool fretStates[5] = {0};
@@ -55,4 +55,14 @@ int nspt(const int nbpm, const int resolution){
   // nbpm: 133000 = 133bpm
   // resolution: number of ticks per beat
   return 60000000000 / (nbpm * resolution);
+}
+
+// Generates a background gradient automatically:
+void setBgGradient(QGraphicsScene* scene){
+  QLinearGradient gradient(scene->sceneRect().width(),0,
+                           0,scene->sceneRect().height());
+  gradient.setColorAt(0,bgGradient[0]);
+  gradient.setColorAt(1,bgGradient[1]);
+  QBrush brush(gradient);
+  scene->setBackgroundBrush(brush);
 }

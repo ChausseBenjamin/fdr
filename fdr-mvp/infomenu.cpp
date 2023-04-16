@@ -1,6 +1,7 @@
 #include "infomenu.h"
 #include "mainmenu.h"
 #include "ui.h"
+#include "common.h"
 
 #include <QColor>
 #include <QFont>
@@ -10,6 +11,8 @@
 InfoMenu::InfoMenu(QGraphicsView* view, QObject* parent) {
   this->view = view;
   this->setSceneRect(view->rect());
+  // Set background
+  setBgGradient(this);
 
   const char* rulesText = R"(
 Le jeu "Flaming Devillish Relish est un hommage au jeu créé par
@@ -25,6 +28,7 @@ merci d'essayer notre jeu.
 
 - Benjamin C.
 - Brenda T.
+- Gabriel N.
 - Guillaume M.
 - Simon G.
 - Zachary P.

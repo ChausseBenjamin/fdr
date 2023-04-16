@@ -12,12 +12,14 @@ SOURCES += \
     chord.cpp \
     common.cpp \
     difficultymenu.cpp \
+    endmenu.cpp \
     fret.cpp \
     gamescene.cpp \
     infomenu.cpp \
     leftbar.cpp \
     mainmenu.cpp \
     note.cpp \
+    remote.cpp \
     rightbar.cpp \
     rulesmenu.cpp \
     song.cpp \
@@ -30,12 +32,14 @@ HEADERS += \
     chord.h \
     common.h \
     difficultymenu.h \
+    endmenu.h \
     fret.h \
     gamescene.h \
     infomenu.h \
     leftbar.h \
     mainmenu.h \
     note.h \
+    remote.h \
     rightbar.h \
     rulesmenu.h \
     song.h \
