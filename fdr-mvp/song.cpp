@@ -390,7 +390,7 @@ void Song::strum(){
   // Check if the strum is played on time:
   int diffWithNoteDrag = currentTime - currentChord->getStart();
   int diffWithNoteRush = currentChord->getStart() - currentTime;
-  qDebug() << "DiffRush = " + QString::number(diffWithNoteRush) + " --- DiffDrag = " + QString::number(diffWithNoteDrag);
+  //qDebug() << "DiffRush = " + QString::number(diffWithNoteRush) + " --- DiffDrag = " + QString::number(diffWithNoteDrag);
   if ((diffWithNoteDrag < TOLERANCE_DRAGGING && diffWithNoteDrag > 0) || (diffWithNoteRush < TOLERANCE_RUSHING && diffWithNoteRush > 0)){
       bool noteCorrectlyPlayed = true;
       for (int i = 0; i < 5; i++) {
@@ -402,6 +402,17 @@ void Song::strum(){
       if (noteCorrectlyPlayed)
       {
           chordScore = SCORE_GOOD_NOTE;
+          if (currentChord->getDuration() != 0)
+          {
+              qDebug() << QString::number(currentChord->getDuration());
+              QTimer* longReleaseClock = new QTimer();
+              longReleaseClock->setInterval(1);
+              int test = currentScoreChord;
+              connect(longReleaseClock, &QTimer::timeout, this, [=]() {longCheck(longReleaseClock, test);
+                  });
+              longReleaseClock->start();
+              longNote = true;
+          }
           currentScoreChord++;
       }
       else
@@ -436,6 +447,47 @@ void Song::strum(){
   qDebug() << tmp;
   highscore += chordScore;
   scene->getRightBar()->setScore(highscore);
+}
+
+void Song::longCheck(QTimer* clock, uint chordIndex)
+{
+    bool needToResetClock = false;
+    if (longNote)
+    {
+        qint64 currentTime = mediaPlayer->position();
+        Chord* currentChord = &(currentDifficulty->at(chordIndex));
+        std::array<bool, 5> currentChordBools = currentChord->getNotes();
+
+        if (currentChord->getEnd() >= currentTime)
+        {
+            if (currentChord->getStart() <= currentTime)
+            {
+                bool noteCorrectlyPlayed = true;
+                for (int i = 0; i < 5; i++) {
+                    if (fretStates[i] != currentChordBools[i]) {
+                        noteCorrectlyPlayed = false;
+                    }
+                }
+                if (noteCorrectlyPlayed)
+                {
+                    highscore += 1;
+                    scene->getRightBar()->setScore(highscore);
+                }
+                else {
+                    needToResetClock = true;
+                }
+            }
+        }
+        else {
+            needToResetClock = true;
+        }
+        if (needToResetClock)
+        {
+            longNote = false;
+            delete clock;
+            clock = nullptr;
+        }
+    }
 }
 
 QString Song::getTitle(){

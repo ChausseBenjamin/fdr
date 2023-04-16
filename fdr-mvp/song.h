@@ -45,6 +45,7 @@ class Song:public QObject {
     bool longNote;
     int highscore;
     std::vector<Chord>* currentDifficulty;
+    void longCheck(QTimer* clock, uint chordIndex);
     void spawnHandler();
     void scoreHandler();
     void handleMediaStatusChanged(QMediaPlayer::MediaStatus);
