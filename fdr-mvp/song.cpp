@@ -215,24 +215,25 @@ void Song::consolidate(int difficulty){
            (cChord->getEnd()   == nextChord->getEnd()) ){
         cChord->merge(nextChord);
         chords->erase(chords->begin()+j);
+        j--;
         chordSize--;
       }
     }
   }
-  for (int i = 0; i < chords->size(); i++)
-  {
-      Chord chordIndividuelle = chords->at(i);
-      QString tmp = "{";
-      for (i < 0; i < 5; i++) {
-          Note* bleh = chordIndividuelle.notes[i];
-          if (bleh != nullptr)
-          {
-              tmp += QString::number(bleh->getFret()) + ", ";
-              //tmp += (allNotes[i]) ? 'X' : ' ';
-          }
-      }
-      qDebug() << tmp;
-  }
+  //for (int i = 0; i < chords->size(); i++)
+  //{
+  //    Chord chordIndividuelle = chords->at(i);
+  //    QString tmp = "{";
+  //    for (i < 0; i < 5; i++) {
+  //        Note* bleh = chordIndividuelle.notes[i];
+  //        if (bleh != nullptr)
+  //        {
+  //            tmp += QString::number(bleh->getFret()) + ", ";
+  //            //tmp += (allNotes[i]) ? 'X' : ' ';
+  //        }
+  //    }
+  //    qDebug() << tmp;
+  //}
   chords->shrink_to_fit();
 }
 
@@ -401,7 +402,7 @@ void Song::strum(){
       }
       if (noteCorrectlyPlayed)
       {
-          chordScore = SCORE_GOOD_NOTE;
+          chordScore = SCORE_GOOD_NOTE * currentChord->getNbNotes();
           if (currentChord->getDuration() != 0)
           {
               qDebug() << QString::number(currentChord->getDuration());
@@ -470,7 +471,7 @@ void Song::longCheck(QTimer* clock, uint chordIndex)
                 }
                 if (noteCorrectlyPlayed)
                 {
-                    highscore += 1;
+                    highscore += 1 * currentChord->getNbNotes();
                     scene->getRightBar()->setScore(highscore);
                 }
                 else {

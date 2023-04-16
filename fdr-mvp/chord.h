@@ -31,12 +31,13 @@ class Chord:public QObject {
     void setSpawnTime(int ms);
     std::array<bool,5> getNotes();
     Note* notes[5];  // Simultaneous notes in one chord
+    int getNbNotes();
   public slots:
     void despawn() const; // Delete the chord once offscreen
   private:
-    const int duration;    // ms (0 if the note is a single stroke)
-    const int start;       // Real time (in ms) at which the note should be hit
-    const int end;         // Real time (in ms) at which the note should stop
+    int duration;    // ms (0 if the note is a single stroke)
+    int start;       // Real time (in ms) at which the note should be hit
+    int end;         // Real time (in ms) at which the note should stop
     int rushStart;         // Minimum allowed time to hit the note
     int dragStart;         // Maximum allowed time to hit the note
     // Release values are set relative to the song's beggining
