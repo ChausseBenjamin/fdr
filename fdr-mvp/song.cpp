@@ -303,6 +303,10 @@ void Song::play(int difficulty){
   currentSpawnChord=0;
   currentScoreChord=0;
   highscore=0;
+  bargraphState = 0;
+  currentStreak = 0;
+  maxStreak = 0;
+  correctlyPlayedNotes = 0;
   // for (int i=0;i<5;i++) scoreTab[i] =0;
   // Initialise the checking timer
   clock = new QTimer(this);
@@ -414,10 +418,21 @@ void Song::strum(){
               longReleaseClock->start();
               longNote = true;
           }
+          correctlyPlayedNotes++;
+          currentStreak++;
+          if (currentStreak > maxStreak)
+          {
+              maxStreak = currentStreak;
+          }
+          if (currentStreak % STREAK_TO_INCREASE_BARGRAPH == 0 && bargraphState < 10)
+          {
+              bargraphState++;
+          }
           currentScoreChord++;
       }
       else
       {
+          currentStreak = 0;
           chordScore = SCORE_SURPLUS_NOTE;
       }
     // std::array<bool,5> currentChordBools = currentChord->getNotes();
@@ -427,6 +442,7 @@ void Song::strum(){
   }
   else
   {
+      currentStreak = 0;
       chordScore = SCORE_SURPLUS_NOTE;
   }
   switch (chordScore){
@@ -448,6 +464,7 @@ void Song::strum(){
   qDebug() << tmp;
   highscore += chordScore;
   scene->getRightBar()->setScore(highscore);
+  scene->getRightBar()->setStreak(currentStreak);
 }
 
 void Song::longCheck(QTimer* clock, uint chordIndex)
@@ -514,6 +531,18 @@ return charter;
 
 QString Song::getScore() {
     return QString::number(highscore);
+}
+
+QString Song::getMaxStreak() {
+    return QString::number(maxStreak);
+}
+
+int Song::getSongSize() {
+    return currentDifficulty->size();
+}
+
+int Song::getCorrectlyPlayedNotes() {
+    return correctlyPlayedNotes;
 }
 
 void Song::handleMediaStatusChanged(QMediaPlayer::MediaStatus status) {

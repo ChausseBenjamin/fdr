@@ -15,13 +15,20 @@ RightBar::RightBar(GameScene* scene) {
   score = new QGraphicsTextItem("Score: 0");
   score->setDefaultTextColor(TEXT_COLOR_MAIN);
   score->setFont(QFont("Arial", 32));
+  streak = new QGraphicsTextItem("Notes de suite: 0");
+  streak->setDefaultTextColor(TEXT_COLOR_MAIN);
+  streak->setFont(QFont("Arial", 32));
   place();
 }
 
 RightBar::~RightBar(){}
 
-void RightBar::setScore(const int score){
-  this->score->setPlainText("Score: "+QString::number(score));
+void RightBar::setScore(const int score) {
+    this->score->setPlainText("Score: " + QString::number(score));
+}
+
+void RightBar::setStreak(const int streak) {
+    this->streak->setPlainText("Notes de suite: " + QString::number(streak));
 }
 
 void RightBar::place(){
@@ -30,4 +37,7 @@ void RightBar::place(){
                    TEXT_SIDE_PADDING;
   score->setPos(xPos,TEXT_TOP_PADDING);
   scene->addItem(score);
+
+  streak->setPos(xPos, score->pos().y() + score->boundingRect().height() + TEXT_MARGIN_Y);
+  scene->addItem(streak);
 }
